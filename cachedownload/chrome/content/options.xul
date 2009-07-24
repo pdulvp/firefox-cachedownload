@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://communicator/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+
+<!DOCTYPE window SYSTEM "chrome://cachedownload/locale/locale.dtd">
+
+
+<dialog xmlns:html="http://www.w3.org/1999/xhtml"
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+      xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+      onload="CacheDownload_Options.onLoad();"
+      ondialogaccept="CacheDownload_Options.onDialogAccept();"
+      orient="vertical"
+	title="&cachedownload.options.title;">
+
+	<script type="application/x-javascript" src="chrome://cachedownload/content/options.js"/>
+
+		<groupbox>
+			<caption label="Status bar" />
+			<hbox pack="left">
+				<checkbox
+			        id="cachedownload_chbx_show"
+			        label="&cachedownload.options.chbx_show.label;"
+			        tooltiptext="&cachedownload.options.chbx_show.desc;"
+			        checked="true" />
+	   		</hbox>
+	    </groupbox>
+	    
+	    <groupbox>
+			<caption label="&cachedownload.options.shortcuts;" />
+			
+		    <vbox id="cachedownload_hbx_keyaccess">
+		    	<label value="&cachedownload.options.shortcuts.restartneeded;" width="200px"/>
+				<hbox>
+			    <vbox id="cachedownload_vbx1">
+			    	<label value="&cachedownload.options.shortcuts.previous;" />
+					<textbox id="cachedownload_key_prev_tb" onkeydown="CacheDownload_Options.onKeyDown(event, 0)" onkeyup="CacheDownload_Options.onKeyUp(event, 0)"  flex="1"/>
+			    </vbox>
+			    <vbox id="cachedownload_vbx2">
+			    	<label value="&cachedownload.options.shortcuts.next;" />
+					<textbox id="cachedownload_key_next_tb" onkeydown="CacheDownload_Options.onKeyDown(event, 1)" onkeyup="CacheDownload_Options.onKeyUp(event, 1)"  flex="1"/>
+			    </vbox>
+				</hbox>
+		    </vbox> 
+		    
+	    </groupbox>
+	    
+</dialog>

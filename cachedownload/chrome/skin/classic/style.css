@@ -1,0 +1,17 @@
+@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+
+
+#cachedownload-button-switchmode[disabled="true"]  {
+  list-style-image: url("chrome://cachedownload/skin/previousb.png");
+}
+#cachedownload-button-switchmode  {
+  list-style-image: url("chrome://cachedownload/skin/previous.png");
+}
+
+toolbar[iconsize="small"] #cachedownload-button-switchmode[disabled="true"]  {
+  list-style-image: url("chrome://cachedownload/skin/previousb16.png");
+}
+toolbar[iconsize="small"] #cachedownload-button-switchmode  {
+  list-style-image: url("chrome://cachedownload/skin/previous16.png");
+}
+
