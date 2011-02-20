@@ -1,33 +1,268 @@
-﻿function PrefListener(branchName, func) {  
-    var prefService = Components.classes["@mozilla.org/preferences-service;1"]  
-                                .getService(Components.interfaces.nsIPrefService);  
-    var branch = prefService.getBranch(branchName);  
+﻿function Lexeme(id, keyword) {
+	this.id = id;
+	this.keyword = keyword;
+	this.parent = null;
+	this.childs = [];
+	this.toString = function() { return this.id + ":"+this.keyword +"\n"; };
+	
+	this.toString2 = function(chr) { 
+		var s = chr+"-"+this.toString()+"";
+		chr = chr+" ";
+		if (this.childs!=null) {
+		for(var i=0; i < this.childs.length; i++) {
+			s+=this.childs[i].toString2(chr);
+		}
+		}
+		return s; 
+	};
+};
+
+var AnalyseParser={
+	
+	AP_Empty 	: { id:"AP_Empty", 		matche: function (chr) { return true; } },
+	AP_String 	: { id:"AP_String", 	matche: function (chr) { return /\w/.test(chr); } },
+	AP_Quote 	: { id:"AP_Quote", 		matche: function (chr) { return chr=="\'"; } },
+	AP_Dollar 	: { id:"AP_Dollar", 	matche: function (chr) { return chr=="$"; } },
+	AP_Number 	: { id:"AP_Number", 	matche: function (chr) { return /\d/.test(chr); } },
+	AP_Porcent 	: { id:"AP_Porcent", 	matche: function (chr) { return chr=="%"; } },
+	AP_DotComma : { id:"AP_DotComma", 	matche: function (chr) { return chr==";"; } },
+	AP_Comma 	: { id:"AP_Comma", 		matche: function (chr) { return chr==","; } },
+	AP_OpenPar 	: { id:"AP_OpenPar", 	matche: function (chr) { return chr=="("; } },
+	AP_ClosePar : { id:"AP_ClosePar", 	matche: function (chr) { return chr==")"; } },
+	AP_White 	: { id:"AP_White", 		matche: function (chr) { return chr==")"; } },
+	
+	ST_I 	: { id:"ST_I" },
+	ST_ES 	: { id:"ST_ES" },
+	ST_E 	: { id:"ST_E" },
+	ST_S 	: { id:"ST_S" },
+	ST_N 	: { id:"ST_N" },
+	ST_MC 	: { id:"ST_MC" },
+	ST_M 	: { id:"ST_M" },
+	ST_F 	: { id:"ST_F" },
+	ST_PS 	: { id:"ST_PS" },
+	ST_FINISH : { id:"ST_FINISH" },
+	
+	lexicalQuotes : [],
+	lexicalStates : [],
+	
+	initializeLangage: function AP_initializeLangage() {
+		
+		this.lexicalQuotes = [];
+		
+		//Create a map<quoteId,quote>
+		this.lexicalQuotes[this.AP_Empty.id] = this.AP_Empty;
+		this.lexicalQuotes[this.AP_String.id] = this.AP_String;
+		this.lexicalQuotes[this.AP_Quote.id] = this.AP_Quote;
+		this.lexicalQuotes[this.AP_Dollar.id] = this.AP_Dollar;
+		this.lexicalQuotes[this.AP_Number.id] = this.AP_Number;
+		this.lexicalQuotes[this.AP_Porcent.id] = this.AP_Porcent;
+		this.lexicalQuotes[this.AP_DotComma.id] = this.AP_DotComma;
+		this.lexicalQuotes[this.AP_Comma.id] = this.AP_Comma;
+		this.lexicalQuotes[this.AP_OpenPar.id] = this.AP_OpenPar;
+		this.lexicalQuotes[this.AP_ClosePar.id] = this.AP_ClosePar;
+		
+		
+		//Create a map<stateId,map<quoteId,stateId>> (langage automaton definition)
+		this.lexicalStates[this.ST_I.id]=[]; 
+		this.lexicalStates[this.ST_I.id][this.AP_Empty.id]=this.ST_ES.id;
+		
+		this.lexicalStates[this.ST_ES.id]=[]; 
+		this.lexicalStates[this.ST_ES.id][this.AP_DotComma.id]=this.ST_ES.id;
+		this.lexicalStates[this.ST_ES.id][this.AP_Empty.id]=this.ST_E.id;
+		
+		this.lexicalStates[this.ST_E.id]=[]; 
+		this.lexicalStates[this.ST_E.id][this.AP_Quote.id]=this.ST_S.id;
+		this.lexicalStates[this.ST_E.id][this.AP_Number.id]=this.ST_N.id;
+		this.lexicalStates[this.ST_E.id][this.AP_Porcent.id]=this.ST_MC.id;
+		this.lexicalStates[this.ST_E.id][this.AP_Dollar.id]=this.ST_F.id;
+		
+		this.lexicalStates[this.ST_S.id]=[]; 
+		this.lexicalStates[this.ST_S.id][this.AP_String.id]=this.ST_S.id;
+		this.lexicalStates[this.ST_S.id][this.AP_Quote.id]=this.ST_FINISH.id;		
+	
+		this.lexicalStates[this.ST_N.id]=[]; 
+		this.lexicalStates[this.ST_N.id][this.AP_Number.id]=this.ST_N.id;
+		this.lexicalStates[this.ST_N.id][this.AP_Empty.id]=this.ST_FINISH.id;	
+		
+		this.lexicalStates[this.ST_MC.id]=[]; 
+		this.lexicalStates[this.ST_MC.id][this.AP_Empty.id]=this.ST_M.id;
+		
+		this.lexicalStates[this.ST_M.id]=[]; 
+		this.lexicalStates[this.ST_M.id][this.AP_String.id]=this.ST_M.id;
+		this.lexicalStates[this.ST_M.id][this.AP_Empty.id]=this.ST_FINISH.id;	
+		
+		this.lexicalStates[this.ST_F.id]=[]; 
+		this.lexicalStates[this.ST_F.id][this.AP_OpenPar.id]=this.ST_PS.id;
+		this.lexicalStates[this.ST_F.id][this.AP_String.id]=this.ST_M.id;
+		
+		this.lexicalStates[this.ST_PS.id]=[]; 
+		this.lexicalStates[this.ST_PS.id][this.AP_Comma.id]=this.ST_PS.id;
+		this.lexicalStates[this.ST_PS.id][this.AP_ClosePar.id]=this.ST_FINISH.id;
+		this.lexicalStates[this.ST_PS.id][this.AP_Empty.id]=this.ST_E.id;
+		
+		this.lexicalStates[this.ST_FINISH.id]=[]; 
+		this.lexicalStates[this.ST_FINISH.id][this.AP_Empty.id]=this.ST_FINISH.id;
+		
+	}, 
+	
+	log: function AP_init(string) {
+		var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
+		//alert(string);
+		aConsoleService.logStringMessage(string);
+	}, 
+	
+	init: function AP_init() {
+		this.initializeLangage();
+		
+		var lexeme = null;
+		//var string = "$(11)popo";
+		//this.lexical(string);
+		
+		string = "$concat($add($mult(15,12),0),$add(1,2))";//string = "$ct(1))";
+		this.log(string);
+		lexeme = this.lexical(string);
+		//lexeme = this.lexical(string);
+		if (lexeme!=null) {
+			this.reduce(lexeme);
+			this.evaluate(lexeme);
+		}
+		
+		/*
+		this.log(string);
+		lexeme = this.lexical(string);
+		if (lexeme!=null) {
+			this.evaluate(lexeme);
+		}
+		*/
+	},
+	
+	merge: function AP_merge(lex1, lex2) {
+		if (lex1.id == this.ST_M.id && lex2.id == this.ST_M.id) {
+			return true;
+		}
+		if (lex1.id == this.ST_N.id && lex2.id == this.ST_N.id) {
+			return true;
+		}
+		return false;
+	},
+	
+	reduce: function AP_lexical(lexeme) {
+		
+	},
+	
+	evaluate: function AP_lexical(lexeme) {
+		this.log(lexeme.toString2(""));
+	},
+	
+	lexical: function AP_lexical(string) {
+		var lexicalLexemes = [];
+		var previousLexeme = null;
+		var initLexeme = new Lexeme(this.ST_I.id, "INIT");
+		var indexString = 0;
+		
+		var currentLexeme = initLexeme;
+		lexicalLexemes.push(initLexeme);
+		//this.log("start"+lexicalLexemes);
+		while (currentLexeme != null) {
+			
+			var currentChar = string.charAt(indexString);
+			var currentStateId = currentLexeme.id;
+			
+			//this.log("All:\n"+initLexeme.toString2("")+"\n"+"Current:"+currentLexeme.id+"\n");
+			
+			if (currentLexeme.id==this.ST_FINISH.id) {
+				//Remove the finish
+				var parentLexeme = currentLexeme.parent;
+				parentLexeme.childs.splice(parentLexeme.childs.indexOf(currentLexeme));
+				
+				//Merge parents if necessary
+				currentLexeme = parentLexeme.parent;
+				
+				//parentLexeme = currentLexeme.parent;
+				//if (parentLexeme!=undefined && currentLexeme!=undefined && this.merge(currentLexeme, parentLexeme) && parentLexeme.childs.indexOf(currentLexeme)>=0) {
+				//	parentLexeme.keyword+=currentLexeme.keyword;
+				//	parentLexeme.childs.splice(parentLexeme.childs.indexOf(currentLexeme));
+				//}
+				//currentLexeme = parentLexeme;
+				//alert("nextLoop");
+				continue;
+			}
+			
+			//Find a match
+			var matchedQuote = null;
+			var nextStateId = null;
+			for (var currentQuoteId in this.lexicalStates[currentStateId]) {
+				var currentQuote = this.lexicalQuotes[currentQuoteId];
+				if (currentQuote.matche(currentChar)) {
+					//this.log("Match : "+currentChar+" by "+currentQuoteId+"("+currentStateId+")");
+					var tmpNextStateId = this.lexicalStates[currentStateId][currentQuoteId];
+					nextStateId=tmpNextStateId;
+					matchedQuote = currentQuote;
+					break;
+				}
+			}
+			
+			if (matchedQuote==null) {
+				currentLexeme = currentLexeme.parent;
+				
+			} else {
+				var loggedChar = "";
+				if (matchedQuote != this.AP_Empty) {
+					indexString++;
+					loggedChar = currentChar
+				}
+				
+				//this.log("Match: Create a new lexeme:" + nextStateId + ";"+loggedChar);
+				var lexeme = new Lexeme(nextStateId, loggedChar);
+				if (previousLexeme != null && previousLexeme.parent == currentLexeme && previousLexeme.keyword==lexeme.keyword && previousLexeme.id==lexeme.id) {
+					//alert("end");	
+					previousLexeme.parent.childs.splice(previousLexeme.parent.childs.indexOf(previousLexeme));
+					return initLexeme;
+				}
+				currentLexeme.childs.push(lexeme);
+				lexeme.parent=currentLexeme;
+				currentLexeme = lexeme;
+				previousLexeme = lexeme;
+			}
+			
+			//alert("nextLoop");
+		}
+		
+		return initLexeme;
+	}
+	
+};
+
+
+function PrefListener(branchName, func) {  
+    var prefService = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService);  
+    var branch = prefService.getBranch(branchName);
     branch.QueryInterface(Components.interfaces.nsIPrefBranch2);  
-  
+
     this.register = function() {  
         branch.addObserver("", this, false);  
         branch.getChildList("", { })  
               .forEach(function (name) { func(branch, name); });  
-    };  
-  
+    };
+
     this.unregister = function unregister() {  
         if (branch)  
             branch.removeObserver("", this);  
-    };  
-  
+    };
+
     this.observe = function(subject, topic, data) {  
        if (topic == "nsPref:changed")  
              func(branch, data);  
-    };  
+    };
 }
+
 
 
 var CacheDownloadUtil={
 
 	getFirstTabItemClass: function CV_getFirstTab(className) {
 		
-			var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-		                     .getService(Components.interfaces.nsIWindowMediator);
+			var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"].getService(Components.interfaces.nsIWindowMediator);
 		  	var browserEnumerator = wm.getEnumerator("navigator:browser");
 		
 		  	// Check each browser instance for our URL
@@ -172,11 +407,13 @@ function Match(title, regexp_p, fileNameData_p, infos_p) {
 		if (this.infos!=null) {
 			for(var info in this.infos) {
 				var value=this.infos[info].getValue();
-				//aConsoleService.logStringMessage("Before:key="+info+"\nvalue="+this.infos[info]+"\nvalueR="+value+"\nresult="+fileName);
+				
+//aConsoleService.logStringMessage("Before:key="+info+"\nvalue="+this.infos[info]+"\nvalueR="+value+"\nresult="+fileName);
 				if (value!=null) {
 					var reg = new RegExp("\\$"+info,"g");
 					fileName=fileName.replace(reg, value);
-					//aConsoleService.logStringMessage("After:key="+info+"\nvalue="+this.infos[info]+"\nresult="+fileName);
+					
+//aConsoleService.logStringMessage("After:key="+info+"\nvalue="+this.infos[info]+"\nresult="+fileName);
 					
 				}
 			}
@@ -219,8 +456,7 @@ var CacheDownload={
 	
 	get _cacheService() {
 		if (!this.__cacheService) {
-			this.__cacheService = Components.classes["@mozilla.org/network/cache-service;1"]
-							.getService(Components.interfaces.nsICacheService);
+			this.__cacheService = Components.classes["@mozilla.org/network/cache-service;1"].getService(Components.interfaces.nsICacheService);
 		}
 		return this.__cacheService;
 	},
@@ -228,8 +464,7 @@ var CacheDownload={
 	
 	get _dateService() {
 		if (!this.__dateService) {
-			this.__dateService = Components.classes["@mozilla.org/intl/scriptabledateformat;1"]
-							.getService(Components.interfaces.nsIScriptableDateFormat);
+			this.__dateService = Components.classes["@mozilla.org/intl/scriptabledateformat;1"].getService(Components.interfaces.nsIScriptableDateFormat);
 		}
 		return this.__dateService;
 	},
@@ -254,7 +489,12 @@ var CacheDownload={
 		var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].
 	    getService(Components.interfaces.nsIConsoleService);
 		
+		
+		
 		if (CacheDownload.enabled) {
+			AnalyseParser.init();    
+		}
+		/*
 			this.timer = Components.classes["@mozilla.org/timer;1"]
 			       .createInstance(Components.interfaces.nsITimer);
 			
@@ -280,6 +520,7 @@ var CacheDownload={
 				this.timer.cancel();
 			}
 		}
+		*/
 	},
 	
 	// ***** nsICacheVisitor *****
@@ -294,7 +535,8 @@ var CacheDownload={
 	
 	visitEntry: function CV_visitEntry(aDeviceID, aEntryInfo) {
 		
-		var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
+		var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.
+interfaces.nsIConsoleService);
 		
 		if (aEntryInfo.dataSize == 0)
 			return true;

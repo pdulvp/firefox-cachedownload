@@ -2,16 +2,16 @@
 
 
 #cachedownload-button-switchmode[disabled="true"]  {
-  list-style-image: url("chrome://cachedownload/skin/previousb.png");
+  list-style-image: url("chrome://cachedownload/skin/icon24-disabled.png");
 }
 #cachedownload-button-switchmode  {
-  list-style-image: url("chrome://cachedownload/skin/previous.png");
+  list-style-image: url("chrome://cachedownload/skin/icon24.png");
 }
 
 toolbar[iconsize="small"] #cachedownload-button-switchmode[disabled="true"]  {
-  list-style-image: url("chrome://cachedownload/skin/previousb16.png");
+  list-style-image: url("chrome://cachedownload/skin/icon16-disabled.png");
 }
 toolbar[iconsize="small"] #cachedownload-button-switchmode  {
-  list-style-image: url("chrome://cachedownload/skin/previous16.png");
+  list-style-image: url("chrome://cachedownload/skin/icon16.png");
 }
 
