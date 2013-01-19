@@ -1,2 +1,54 @@
-<!-- TOOLBAR AND STATUSBAR BUTTONS -->
-<!ENTITY cachedownload.switchmode "Switch">
+﻿<!-- TOOLBAR AND STATUSBAR BUTTONS -->
+<!ENTITY cachedownload.switchmode "CacheDownload">
+<!ENTITY cachedownload.options.title "Options">
+
+<!ENTITY cachedownload.options.pane.rules "Règles">
+<!ENTITY cachedownload.options.pane.general "Général">
+
+<!ENTITY cachedownload.options.rules.identifier.label "Nom">
+<!ENTITY cachedownload.options.rules.description.label "Description">
+
+<!ENTITY cachedownload.options.rules.new "Nouvelle règle">
+<!ENTITY cachedownload.options.rules.edit "Editer">
+<!ENTITY cachedownload.options.rules.delete "Supprimer">
+<!ENTITY cachedownload.options.rules.loadDefaults "Défaut">
+<!ENTITY cachedownload.options.rules.moveUp "Monter">
+<!ENTITY cachedownload.options.rules.moveDown "Descendre">
+
+<!ENTITY cachedownload.options.editrule.identifier.label "Nom (*)">
+<!ENTITY cachedownload.options.editrule.description.label "Description">
+<!ENTITY cachedownload.options.editrule.filenameExpression.label "Expresssion du fichier de sortie">
+<!ENTITY cachedownload.options.editrule.global.label "Global">
+<!ENTITY cachedownload.options.editrule.ruleExpression.label "Expression régulière d'application de règle">
+
+<!ENTITY cachedownload.options.general.label "Général">
+<!ENTITY cachedownload.options.general.timeCheckCache "Temps entre deux vérifications du cache (ms)">
+<!ENTITY cachedownload.options.general.timeConsecutiveDownload "Temps entre deux téléchargements consécutifs (ms)">
+<!ENTITY cachedownload.options.general.MaxSameSize "Télécharger un élément si sa taille n'a pas été modifié depuis (x) vérifications">
+
+<!ENTITY cachedownload.options.listview.title "Eléments">
+<!ENTITY cachedownload.options.listview.key.label "Clé">
+<!ENTITY cachedownload.options.listview.value.label "Valeur">
+
+<!ENTITY cachedownload.options.cacheview.title "Visualiseur du cache">
+<!ENTITY cachedownload.options.cacheview.filename.label "Fichier">
+<!ENTITY cachedownload.options.cacheview.evaluatedFilename.label "Destination">
+<!ENTITY cachedownload.options.cacheview.contentType.label "Content-Type">
+<!ENTITY cachedownload.options.cacheview.url.label "URL">
+
+<!ENTITY cachedownload.options.variables.title "Variables">
+<!ENTITY cachedownload.options.variables.name.label "Name">
+<!ENTITY cachedownload.options.variables.description.label "Description">
+
+<!ENTITY cachedownload.options.functions.title "Functions">
+<!ENTITY cachedownload.options.functions.name.label "Name">
+<!ENTITY cachedownload.options.functions.format.label "Format">
+<!ENTITY cachedownload.options.functions.description.label "Description">
+
+<!ENTITY cachedownload.warning " Assurez-vous de ne pas enfreindre la loi en téléchargeant certains fichiers">
+<!ENTITY cachedownload.warning2 " Soutenir la création la rend plus forte">
+<!ENTITY cachedownload.options.helpRuleExpression "Insérer une expression régulière ici.">
+<!ENTITY cachedownload.options.helpFileExpression "Insérer l'expression pour déterminer le nom du fichier">
+<!ENTITY cachedownload.options.functions "Afficher les fonctions prédéfinies">
+<!ENTITY cachedownload.options.predefinedVariables "Afficher les variables prédéfinies">
+<!ENTITY cachedownload.options.checkCache "Chercher les éléments du cache vérifiant l'expression saisie">

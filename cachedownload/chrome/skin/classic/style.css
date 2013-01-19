@@ -1,17 +1,113 @@
-@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
-
+﻿@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
 
 #cachedownload-button-switchmode[disabled="true"]  {
-  list-style-image: url("chrome://cachedownload/skin/icon24-disabled.png");
+  list-style-image: url("chrome://cachedownload/skin/icon24.png");
 }
 #cachedownload-button-switchmode  {
-  list-style-image: url("chrome://cachedownload/skin/icon24.png");
+  list-style-image: url("chrome://cachedownload/skin/icon24b.png");
 }
 
 toolbar[iconsize="small"] #cachedownload-button-switchmode[disabled="true"]  {
-  list-style-image: url("chrome://cachedownload/skin/icon16-disabled.png");
-}
-toolbar[iconsize="small"] #cachedownload-button-switchmode  {
   list-style-image: url("chrome://cachedownload/skin/icon16.png");
 }
+toolbar[iconsize="small"] #cachedownload-button-switchmode ,
+window:not([active="true"]) #cachedownload-button-switchmode  {
+  list-style-image: url("chrome://cachedownload/skin/icon16b.png");
+}
 
+#cachedownload-window radio[pane] {
+  list-style-image: url("chrome://cachedownload/skin/toolbar-button.png");
+}
+
+radio[pane=paneGeneral] {		-moz-image-region: rect(0 24px 24px 0)}
+radio[pane=paneRules] {		-moz-image-region: rect(0 48px 24px 24px)}
+
+#btnVariablesHelp {
+  list-style-image: url("chrome://cachedownload/skin/variables.png");
+}
+
+#btnCheckFileNameExpression {
+  list-style-image: url("chrome://cachedownload/skin/check.png");
+}
+
+#btnFunctionsHelp {
+  list-style-image: url("chrome://cachedownload/skin/functions.png");
+}
+
+#btnFunctionsVariablesHelp {
+  list-style-image: url("chrome://cachedownload/skin/functions.png");
+  width:42px;
+  min-width:42px;
+  max-width:42px;
+}
+
+
+
+#btnCheckExpression {
+  list-style-image: url("chrome://cachedownload/skin/browse.png");
+  width:32px;
+  min-width:32px;
+  max-width:32px;
+}
+
+#btnExpressionHelp {
+  list-style-image: url("chrome://cachedownload/skin/help.png");
+  width:32px;
+  min-width:32px;
+  max-width:32px;
+}
+
+#cachedownload-warning {
+    list-style-image: url("chrome://cachedownload/skin/warning.png");
+    background-color:#FFFFDD;
+    border-left:2px solid #DDDDAA;
+    border-right:2px solid #DDDDAA;
+    border-top:2px solid #DDDDAA;
+	padding-left:5px;
+	padding-right:5px;
+	padding-top:5px;
+	margin-bottom:0px;
+}
+
+#cachedownload-warning2{
+    background-color:#FFFFDD;
+    border-left:2px solid #DDDDAA;
+    border-right:2px solid #DDDDAA;
+    border-bottom:2px solid #DDDDAA;
+	padding-left:21px;
+	padding-right:5px;
+	padding-top:3px;
+	padding-bottom:5px;
+	margin-bottom:10px;
+}
+
+
+#cachedownload-info-editRule {
+    list-style-image: url("chrome://cachedownload/skin/help.png");
+    background-color:#DDFFFF;
+    border:2px solid #AADDDD;
+	padding-left:5px;
+	padding-right:5px;
+	padding-top:5px;
+	padding-bottom:5px;
+	margin-bottom:10px;
+}
+
+treechildren::-moz-tree-image(key) {
+	padding-left:3px;
+	padding-right:6px;
+}
+
+treechildren::-moz-tree-image(enabledcol enabled-false) {
+	padding-left:4px;
+	padding-right:4px;
+	list-style-image: url(checkbox.png);
+	-moz-image-region: rect(13px 13px 26px 0px);
+}
+
+treechildren::-moz-tree-image(enabledcol enabled-true) {
+	padding-left:4px;
+	padding-right:4px;
+	list-style-image: url(checkbox.png);
+	-moz-image-region: rect(0px 13px 13px 0px);
+}

@@ -1,48 +1,31 @@
 <?xml version="1.0"?>
-<?xml-stylesheet href="chrome://communicator/skin/" type="text/css"?>
-<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://global/skin/global.css"?>
+<?xml-stylesheet href="chrome://cachedownload/skin/style.css" type="text/css"?>
 
-<!DOCTYPE window SYSTEM "chrome://cachedownload/locale/locale.dtd">
+<!DOCTYPE dialog SYSTEM "chrome://cachedownload/locale/locale.dtd">
 
+<prefwindow id="cachedownload-window"
+    buttons="accept,cancel"
+    title="&cachedownload.options.title;"
+    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+    onload="CacheDownload.Options.onLoad();"
+    onunload="CacheDownload.Options.onDialogAccept();"
+	width="550px"
+	height="370px">
 
-<dialog xmlns:html="http://www.w3.org/1999/xhtml"
-      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-      xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-      onload="CacheDownload_Options.onLoad();"
-      ondialogaccept="CacheDownload_Options.onDialogAccept();"
-      orient="vertical"
-	title="&cachedownload.options.title;">
-
-	<script type="application/x-javascript" src="chrome://cachedownload/content/options.js"/>
-
-		<groupbox>
-			<caption label="Status bar" />
-			<hbox pack="left">
-				<checkbox
-			        id="cachedownload_chbx_show"
-			        label="&cachedownload.options.chbx_show.label;"
-			        tooltiptext="&cachedownload.options.chbx_show.desc;"
-			        checked="true" />
-	   		</hbox>
-	    </groupbox>
-	    
-	    <groupbox>
-			<caption label="&cachedownload.options.shortcuts;" />
-			
-		    <vbox id="cachedownload_hbx_keyaccess">
-		    	<label value="&cachedownload.options.shortcuts.restartneeded;" width="200px"/>
-				<hbox>
-			    <vbox id="cachedownload_vbx1">
-			    	<label value="&cachedownload.options.shortcuts.previous;" />
-					<textbox id="cachedownload_key_prev_tb" onkeydown="CacheDownload_Options.onKeyDown(event, 0)" onkeyup="CacheDownload_Options.onKeyUp(event, 0)"  flex="1"/>
-			    </vbox>
-			    <vbox id="cachedownload_vbx2">
-			    	<label value="&cachedownload.options.shortcuts.next;" />
-					<textbox id="cachedownload_key_next_tb" onkeydown="CacheDownload_Options.onKeyDown(event, 1)" onkeyup="CacheDownload_Options.onKeyUp(event, 1)"  flex="1"/>
-			    </vbox>
-				</hbox>
-		    </vbox> 
-		    
-	    </groupbox>
-	    
-</dialog>
+    <script type="application/x-javascript" src="chrome://cachedownload/content/options.js"/>
+    <script type="application/x-javascript" src="chrome://cachedownload/content/lib.js"/>
+	
+	<prefpane id="paneGeneral" selected="true" label="&cachedownload.options.pane.general;" src="chrome://cachedownload/content/prefs-general.xul" flex="1"/>
+    <prefpane id="paneRules" label="&cachedownload.options.pane.rules;" src="chrome://cachedownload/content/prefs-rules.xul" flex="1"/>
+	
+	<command id="deleteRule" oncommand="CacheDownload.Options.onDeleteRule();"/>
+    <command id="editRule" oncommand="CacheDownload.Options.onEditRule();"/>
+    <command id="newRule" oncommand="CacheDownload.Options.onNewRule();"/>
+    <command id="loadDefaultRules" oncommand="CacheDownload.Options.onLoadDefaultRules();"/>
+	
+    <command id="moveUpRule" oncommand="CacheDownload.Options.onMoveUpRule();"/>
+    <command id="moveDownRule" oncommand="CacheDownload.Options.onMoveDownRule();"/>
+	
+	
+</prefwindow>

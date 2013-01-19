@@ -1,31 +1,21 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?><RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>cachedownload@pdulvp</em:id>
     <em:name>CacheDownload</em:name>
-    <em:version>0.5.201102182000</em:version>
+    <em:version>0.7.201203201406</em:version>
 	<em:description>Download some elements of cache automatically</em:description>
     <em:creator>pdulvp</em:creator>
     <em:iconURL>chrome://cachedownload/skin/icon32.png</em:iconURL>
 	<em:optionsURL>chrome://cachedownload/content/options.xul</em:optionsURL>
     <em:type>2</em:type>
-   
+	
     <em:targetApplication>
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-        <em:minVersion>3.6</em:minVersion>
-        <em:maxVersion>4.0b11</em:maxVersion>
+        <em:minVersion>7.0.1</em:minVersion>
+        <em:maxVersion>11.*</em:maxVersion>
       </Description>
-    </em:targetApplication>m
-   
-    <em:locale>locale/fr-FR/</em:locale>
-    <em:locale>locale/en-US/</em:locale>
-	
-	<em:file>
-		<Description about="urn:mozilla:extension:file:cachedownload.jar">
-			<em:package>content/</em:package>
-		</Description>
-	</em:file>
-
-  <em:aboutURL/><em:updateURL/><em:updateKey/><em:hidden/></Description>      
+    </em:targetApplication>
+  </Description>      
 </RDF>

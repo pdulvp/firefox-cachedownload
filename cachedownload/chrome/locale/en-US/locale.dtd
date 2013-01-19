@@ -1,2 +1,54 @@
-<!-- TOOLBAR AND STATUSBAR BUTTONS -->
-<!ENTITY cachedownload.switchmode "Switch">
+﻿<!-- TOOLBAR AND STATUSBAR BUTTONS -->
+<!ENTITY cachedownload.switchmode "CacheDownload">
+<!ENTITY cachedownload.options.title "Options">
+
+<!ENTITY cachedownload.options.pane.rules "Rules">
+<!ENTITY cachedownload.options.pane.general "General">
+
+<!ENTITY cachedownload.options.rules.identifier.label "Name">
+<!ENTITY cachedownload.options.rules.description.label "Description">
+
+<!ENTITY cachedownload.options.rules.new "New">
+<!ENTITY cachedownload.options.rules.edit "Edit">
+<!ENTITY cachedownload.options.rules.delete "Delete">
+<!ENTITY cachedownload.options.rules.loadDefaults "Load Default">
+<!ENTITY cachedownload.options.rules.moveUp "Move Up">
+<!ENTITY cachedownload.options.rules.moveDown "Move Down">
+
+<!ENTITY cachedownload.options.editrule.identifier.label "Name (*)">
+<!ENTITY cachedownload.options.editrule.description.label "Description">
+<!ENTITY cachedownload.options.editrule.filenameExpression.label "Filename expresssion">
+<!ENTITY cachedownload.options.editrule.global.label "Global">
+<!ENTITY cachedownload.options.editrule.ruleExpression.label "Regular expression to match cache items">
+
+<!ENTITY cachedownload.options.general.label "Main">
+<!ENTITY cachedownload.options.general.timeCheckCache "Time between two cache checks (ms)">
+<!ENTITY cachedownload.options.general.timeConsecutiveDownload "Time between two consecutive downloads (ms)">
+<!ENTITY cachedownload.options.general.MaxSameSize "A cache item is downloadable if size hasn't changed for (x) times">
+
+<!ENTITY cachedownload.options.listview.title "Elements">
+<!ENTITY cachedownload.options.listview.key.label "Key">
+<!ENTITY cachedownload.options.listview.value.label "Value">
+
+<!ENTITY cachedownload.options.cacheview.title "Cache viewer">
+<!ENTITY cachedownload.options.cacheview.filename.label "Filename">
+<!ENTITY cachedownload.options.cacheview.evaluatedFilename.label "Output">
+<!ENTITY cachedownload.options.cacheview.contentType.label "Content-Type">
+<!ENTITY cachedownload.options.cacheview.url.label "URL">
+
+<!ENTITY cachedownload.options.variables.title "Variables">
+<!ENTITY cachedownload.options.variables.name.label "Name">
+<!ENTITY cachedownload.options.variables.description.label "Description">
+
+<!ENTITY cachedownload.options.functions.title "Functions">
+<!ENTITY cachedownload.options.functions.name.label "Name">
+<!ENTITY cachedownload.options.functions.format.label "Format">
+<!ENTITY cachedownload.options.functions.description.label "Description">
+
+<!ENTITY cachedownload.warning " Ensure you don't infringe any copyright laws by downloading files">
+<!ENTITY cachedownload.warning2 " Without support, creation is dead">
+<!ENTITY cachedownload.options.helpRuleExpression "Insert a regular expression here">
+<!ENTITY cachedownload.options.helpFileExpression "Insert here file name expression used to saved cache item">
+<!ENTITY cachedownload.options.functions "Display all predefined functions">
+<!ENTITY cachedownload.options.predefinedVariables "Display all predefined variables">
+<!ENTITY cachedownload.options.checkCache "Retrieve cache elements matched by current expression">

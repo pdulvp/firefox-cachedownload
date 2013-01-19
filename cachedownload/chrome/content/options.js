@@ -1,167 +1,359 @@
-var CacheDownload_Options={
-	//This array will contains a reversed array of DOM_VK
-	virtualKeys: null, 
+﻿var CacheDownload = { }
 
+CacheDownload.Options = {
+	treeRules: null,
+	buttonEdit: null,
+	buttonDelete: null,
+	buttonMoveUp: null,
+	buttonMoveDown: null,
+	
+	rules: [],
+	
+	getRuleName: function(row) {
+		return this.rules[row].id;
+	}, 
+	getRuleFileNameExpression: function(row) {
+		return this.rules[row].fileNameExpression;
+	},
+	getDescription: function(row) {
+		return this.rules[row].description;
+	},
+	getruleExpression: function(row) {
+		return this.rules[row].ruleExpression;
+	},
+	isRuleEnabled: function(row) {
+		return this.rules[row].isEnabled;
+	},
+	
+	
+	
+  // --------------------------------------------
+  // nsITreeView interface properties
+  treeSelection: null, // nsiTreeSelection
+  treeBox: null, // The tree
+  editedRowID: null, // The row currently being edited
+  
+  // Getters and Setters
+  set rowCount(i) { throw "rowCount is a readonly property"; },
+  get rowCount() { return this.rules.length; },
+  
+  set selection(s) { this.treeSelection = s; },
+  get selection() { return this.treeSelection; },
+  
+  // START nsITreeView interface methods
+  cycleHeader: function(columnID, element) {
+    
+  },
+  getCellProperties: function(row, columnID, properties) { 
+
+    var atomService = Components.classes["@mozilla.org/atom-service;1"].getService(Components.interfaces.nsIAtomService);
+	if (this.isRuleEnabled(row)) {
+		properties.AppendElement(atomService.getAtom("enabled-true"));
+	} else {
+		properties.AppendElement(atomService.getAtom("enabled-false"));
+	}
+
+  },
+  getCellText: function(row, column) {
+	if (column == "namecol" || column.id == "namecol") {
+      return this.getRuleName(row);
+	  
+    } else if (column == "descriptioncol" || column.id == "descriptioncol") {
+      return this.getDescription(row);
+    }
+    return null;
+	},
+  getColumnProperties: function(columnID, element, properties) {  },
+  getImageSrc: function(rowIndex, column) {
+  	/*if (column == "enabledcol" || column.id == "enabledcol") {
+  		if (this.isRuleEnabled(rowIndex)) {
+  			return "chrome://cachedownload/skin/enabled.png";
+  		} else {
+  			return "chrome://cachedownload/skin/disabled.png";
+  		}
+  	}*/
+  	return null;
+  },
+  getRowProperties: function(rowIndex, properties) {  },
+  isContainer: function(index) { return false; },
+  isSeparator: function(index) { return false; },
+  isSorted: function(index) { /* return false; */ },
+  setTree: function(tree) { this.treeBox=tree; },
+
+//canDropBeforeAfter: function(index, before) { return false; },
+//canDropOn : function(index) { return false; },
+//cycleCell : function(row, columnID) {  },
+//drop: function(row, orientation) {  return false; },
+//getCellValue: function(row, columnID) { /* return null; */ },
+//getLevel: function(index) { return 0; },
+//getParentIndex: function(rowIndex) { return 0; },
+//getProgressMode: function(rowIndex, columnID) { },
+//hasNextSibling: function(rowIndex, afterIndex) { return false; },
+//isContainerEmpty: function(index) { return false; },
+//isContainerOpen: function(index) { },
+//isEditable: function(rowIndex, columnID) { return false; },
+//performAction: function(action) {  },
+//performActionOnCell: function(action, rowIndex, columnID) {  },
+//performActionOnRow: function(action, rowIndex) {  },
+//selectionChanged: function() {  },
+//setCellText: function(rowIndex, columnID, value) {  },
+//toggleOpenState: function(index) { },
+// END nsITreeView interface methods
+    
+	
+  // --------------------------------------------
+	
 	onLoad: function() {
 		//init preference accesser
-		this._prefs = Components.classes["@mozilla.org/preferences-service;1"].
-		                    getService(Components.interfaces.nsIPrefService);
+		this._prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService);
 		this._prefs = this._prefs.getBranch("extensions.cachedownload.");
 		
-		//set checkbox with value in preference storage
-		var widget;
-		if (widget=document.getElementById("cachedownload_chbx_show")) {
-			widget.setAttribute("checked", this._prefs.getBoolPref('show_statusbar_elements'));
+		this.rules = [];
+		
+		var prefValue = this._prefs.getCharPref('rules');
+		CacheDownload.SharedObjects.RulerParser.parseRules(prefValue, CacheDownload.Options.addRule);
+	},
+	
+	onLoadGeneralPane: function() {
+	
+		if(!this._prefs) {
+			this.onLoad();
 		}
+		
+		var timeCheckCache = document.getElementById("cachedownload-timeCheckCache");
+		var timeConsecutiveDownload = document.getElementById("cachedownload-timeConsecutiveDownload");
+		var nbMaxSameSize = document.getElementById("cachedownload-nbMaxSameSize");
+		
+		timeCheckCache.value=this._prefs.getIntPref('TIMER_CACHE_CHECK');
+		timeConsecutiveDownload.value=this._prefs.getIntPref('TIMER_DOWNLOAD_CONSECUTIVE');
+		nbMaxSameSize.value=this._prefs.getIntPref('MAX_SAME');
 
-		//Previous has index 0
-		//Next has index 1
-
-		//This array will contains a int value of modifiers for each key
-		this.modifiers=new Array();
-		//This array will contains a dom_vk value of key pressed for each key
-		this.valueKeys=new Array();
+	},
+	
+	onLoadRulesPane: function() {
+	
+		this.treeRules = document.getElementById("cachedownload-tree");
+		this.treeRules.treeBoxObject.view = this;
 		
-		this.modifiers[0]=CacheDownload_Options.modifiersString2Int(this._prefs.getCharPref('key_previous_modifiers'));
-		this.valueKeys[0]=this._prefs.getCharPref('key_previous_valueKey');
-		document.getElementById("cachedownload_key_prev_tb").value+=CacheDownload_Options.getStringOfKey(0);
+		this.buttonEdit = document.getElementById("editButton");
+		this.buttonDelete = document.getElementById("deleteButton");
+		this.buttonMoveUp = document.getElementById("moveUpButton");
+		this.buttonMoveDown = document.getElementById("moveDownButton");
 		
-		this.modifiers[1]=CacheDownload_Options.modifiersString2Int(this._prefs.getCharPref('key_next_modifiers'));
-		this.valueKeys[1]=this._prefs.getCharPref('key_next_valueKey');
-		document.getElementById("cachedownload_key_next_tb").value+=CacheDownload_Options.getStringOfKey(1);
-		
+		this.onSelectRule();
+	},
+	
+	onLoadAboutPane: function() {
 	},
 	
 	onDialogAccept: function() {
-		
 		if(!this._prefs) return;
 		
-		var widget, value;
-		
-		//save statusbar-buttons option
-		if ((widget=document.getElementById("cachedownload_chbx_show"))) {
-			value=widget.getAttribute("checked")=="true";
-			this._prefs.setBoolPref('show_statusbar_elements', value);
+		var value = CacheDownload.SharedObjects.RulerParser.toXML(this.rules);
+		if (value!=null && value!=undefined && value.length>0) {
+			this._prefs.setCharPref('rules', value);
 		}
 		
-		//save previous key
-		this._prefs.setCharPref('key_previous_modifiers', CacheDownload_Options.modifiersInt2String(this.modifiers[0]));
-		this._prefs.setCharPref('key_previous_valueKey', this.valueKeys[0]?this.valueKeys[0]:"");
-
-		//save next key
-		this._prefs.setCharPref('key_next_modifiers', CacheDownload_Options.modifiersInt2String(this.modifiers[1]));
-		this._prefs.setCharPref('key_next_valueKey', this.valueKeys[1]?this.valueKeys[1]:"");
+		var timeCheckCache = document.getElementById("cachedownload-timeCheckCache");
+		if (timeCheckCache) {
+			this._prefs.setIntPref('TIMER_CACHE_CHECK', timeCheckCache.value);
+		}
 		
-		//Now, the observer linked on preference will be notified
+		var timeConsecutiveDownload = document.getElementById("cachedownload-timeConsecutiveDownload");
+		if (timeConsecutiveDownload) {
+			this._prefs.setIntPref('TIMER_DOWNLOAD_CONSECUTIVE', timeConsecutiveDownload.value);
+		}
+		
+		var nbMaxSameSize = document.getElementById("cachedownload-nbMaxSameSize");
+		if (nbMaxSameSize) {
+			this._prefs.setIntPref('MAX_SAME', nbMaxSameSize.value);
+		}
+		
 	},
 	
-	modifiersInt2String : function(value) {
-		var s="";
-		if ((value & 1)) { //ALT
-			s += (s.length>0?",":"")+"alt";
+	
+	onDoubleClickRule: function() {
+		if (this.treeRules.view.selection.getRangeCount()==0) {
+			return;
 		}
-		if ((value & 2)) { //CTRL
-			s += (s.length>0?",":"")+"ctrl";
+		this.onEditRule();
+	}, 
+	
+	onEnableRule: function() {
+		var index = this.treeRules.currentIndex;
+		
+		if (this.treeRules.view.selection.getRangeCount()==0) {
+			return;
 		}
-		if ((value & 4)) { //SHIFT
-			s += (s.length>0?",":"")+"shift";
-		}
-		if ((value & 8)) { //META
-			s += (s.length>0?",":"")+"meta";
-		}
-
-		return s;
+		
+		this.rules[index].isEnabled=!this.rules[index].isEnabled;
+		
+		// Notify the treeBoxObject that a row has been edited
+		this.treeRules.treeBoxObject.invalidateRow(index);
 	},
 	
-	modifiersString2Int : function(string) {
-		var s=0;
-		if (string.indexOf("alt")!=-1) { //ALT
-			s += 1;
-		}
-		if (string.indexOf("ctrl")!=-1) { //CTRL
-			s += 2;
-		}
-		if (string.indexOf("shift")!=-1) { //SHIFT
-			s += 4;
-		}
-		if (string.indexOf("meta")!=-1) { //META
-			s += 8;
-		}
-
-		return s;
+	onSelectRule: function() {
+		var hasNoSelection = this.treeRules.view.selection.getRangeCount()==0;
+		var index = this.treeRules.currentIndex;
+		var isFirstRow = (index == 0);
+		var isLastRow = (index >= this.rules.length - 1);
+		
+		this.buttonEdit.setAttribute("disabled", hasNoSelection);
+		this.buttonDelete.setAttribute("disabled", hasNoSelection);
+		this.buttonMoveUp.setAttribute("disabled", hasNoSelection || isFirstRow);
+		this.buttonMoveDown.setAttribute("disabled", hasNoSelection || isLastRow);
 	},
 	
-	initVirtualKeys : function(event) {
-		//this function init virtualKeys variable with indexes any keycode, and for each 
-		//index, the DOM_VK constant associated
-		if (CacheDownload_Options.virtualKeys==null) {
-			CacheDownload_Options.virtualKeys=new Array();
+	onDeleteRule: function() {
+		var currentIndex = this.treeRules.currentIndex;
+		this.rules.splice(currentIndex, 1);
 
-			 for(var p in event) {
-			 	if (p[0]=='D' && p[1]=='O') {
-					var ss=""+p;
-					CacheDownload_Options.virtualKeys[event[p]]=ss.substr(7, ss.length-6);
-     			}
+		// Notify the treeBoxObject that a row has been deleted
+		// Select the next row if there is one
+		this.treeRules.treeBoxObject.rowCountChanged(currentIndex, -1);
+	},
+	
+	onNewRule: function() {
+		let result = {};
+		var rule = new CacheDownload.SharedObjects.RuleDefinition();
+		openDialog("edit-rule.xul", "_blank", "chrome,centerscreen,modal,resizable,dialog=no", rule, result);
+
+		if (!("status" in result))
+			return;
+		this.addRule(rule);
+	},
+	
+	onEditRule: function() {
+		var index = this.treeRules.currentIndex;
+		let result = {};
+		openDialog("edit-rule.xul", "_blank", "chrome,centerscreen,modal,resizable,dialog=no", this.rules[index], result);
+		this.validateRule(this.rules[index]);
+		if (!("status" in result))
+			return;
+		
+		this.treeRules.treeBoxObject.invalidateRow(index);
+	},
+	
+	onMoveUpRule: function() {
+		var currentIndex = this.treeRules.currentIndex;
+		var rule = this.rules[currentIndex - 1];
+		this.rules[currentIndex - 1] = this.rules[currentIndex];
+		this.rules[currentIndex] = rule;
+		
+		this.treeRules.treeBoxObject.invalidateRow(currentIndex);
+		this.treeRules.treeBoxObject.invalidateRow(currentIndex - 1);
+		this.treeRules.view.selection.select(currentIndex - 1);
+	},
+	
+	onMoveDownRule: function() {
+		var currentIndex = this.treeRules.currentIndex;
+		var rule = this.rules[currentIndex + 1];
+		this.rules[currentIndex + 1] = this.rules[currentIndex];
+		this.rules[currentIndex] = rule;
+		
+		this.treeRules.treeBoxObject.invalidateRow(currentIndex);
+		this.treeRules.treeBoxObject.invalidateRow(currentIndex + 1);
+		this.treeRules.view.selection.select(currentIndex + 1);
+	},
+	
+	validateRule: function(rule) {
+		if (rule.id == "") {
+			rule.id = "newRule";
+		}
+		if (rule.fileNameExpression == "") {
+			rule.fileNameExpression = "$date_$filename";
+		}
+	},
+	
+	addRule : function(rule) {
+		var self = CacheDownload.Options;
+		self.validateRule(rule);
+		
+		var contains = true;
+		var i=1;
+		var ruleId = rule.id;
+		
+		while (contains) {
+			contains = false;
+			for(var k=0; k<self.rules.length;k++) {
+				if (self.rules[k].id == rule.id) {
+					rule.id = ruleId + " [" + i+"]";
+					i++;
+					contains = true;
+					break;
+				}
 			}
 		}
+		
+		self.rules.push(rule);
+		
+		if (self.treeBox!=null) {
+			// Notify the treeBoxObject that a row has been added
+			// Select the next row if there is one
+			self.treeBox.rowCountChanged(self.rules.length-1, 1);
+		}
 	},
 	
-	getStringOfKey : function(index) {
-		var s = "";
+	onClickRule: function(event) {
+		var tbo = this.treeRules.treeBoxObject;
 		
-		if (this.modifiers[index]) {
-			if (this.modifiers[index] & 1) { //ALT
-				s += " ALT + ";
-			}
-			if (this.modifiers[index] & 2) { //CTRL
-				s += " CTRL + ";
-			}
-			if (this.modifiers[index] & 4) { //SHIFT
-				s += " SHIFT + ";
-			}
-			if (this.modifiers[index] & 8) { //META
-				s += " META + ";
-			}
+		var row = { }, col = { }, child = { };
+		tbo.getCellAt(event.clientX, event.clientY, row, col, child);
+		
+		if (col != null && col.value != null && col.value.id == "enabledcol") {
+			this.onEnableRule();
+			return;
 		}
-		
-		s+=" "+this.valueKeys[index];
-		return s;
+		if (row != null && row.value==-1) {
+			this.treeRules.view.selection.clearSelection();
+			this.onSelectRule();
+		}
+			
 	},
 	
-	onKeyDown: function(event, index) {
-		event.target.value="";
-		CacheDownload_Options.initVirtualKeys(event);
-		
-		this.valueKeys[index]="";
-
-		this.modifiers[index]=0;
-		this.modifiers[index]+=event.altKey   ? 1 : 0;
-		this.modifiers[index]+=event.ctrlKey  ? 2 : 0;
-		this.modifiers[index]+=event.shiftKey ? 4 : 0;
-		this.modifiers[index]+=event.metaKey  ? 8 : 0;
-		
-		if (event.keyCode!=event.DOM_VK_CONTROL &&
-			event.keyCode!=event.DOM_VK_ALT &&
-			event.keyCode!=event.DOM_VK_SHIFT &&
-			CacheDownload_Options.virtualKeys[event.keyCode]) {
-			this.valueKeys[index]=CacheDownload_Options.virtualKeys[event.keyCode];
-		}
-		
-		event.target.value=CacheDownload_Options.getStringOfKey(index);
-		event.stopPropagation();
-		event.preventDefault();
-		
-		return false;
+	onLoadDefaultRules: function() {
+		this.getContents("chrome://cachedownload/content/defaultRules.xml", this.onLoadDefaultRuleCallback);
 	},
 	
-	onKeyUp: function(event, index) {
-		//TODO Check if shortcut is already used
-
-		if (!this.valueKeys[index]) {
-			this.modifiers[index]=0;
-			this.valueKeys[index]="";
-			event.target.value=CacheDownload_Options.getStringOfKey(index);
+	onLoadDefaultRuleCallback: function(content) {
+		if (content != null) {
+			CacheDownload.SharedObjects.RulerParser.parseRules(content, CacheDownload.Options.addRule);
 		}
+	},
+	
+	getContents: function(aURL, fCallback_p) {
+		var listener = {
+			sContent  : "",
+			iStream   : null,
+			fCallback : fCallback_p,
+  
+			onStartRequest: function (aRequest, aContext) {
+			  this.sContent = "";  
+			},
+			
+			onStopRequest: function (aRequest, aContext, aStatusCode) {
+				if (this.iStream != null) {
+					this.iStream.close();
+				}
+				if (Components.isSuccessCode(aStatusCode)) {  
+				  this.fCallback(this.sContent);
+				} else {
+				  this.fCallback(null);  
+				}
+			}, 
+			
+			onDataAvailable: function (aRequest, aContext, aInputStream, aOffset, aLength) {
+				var siStream =  Components.classes["@mozilla.org/scriptableinputstream;1"].createInstance(Components.interfaces.nsIScriptableInputStream);  
+				siStream.init(aInputStream);
+				this.sContent += siStream.read(aLength);
+				this.iStream=aInputStream;
+			}
+		};
+		
+		var ioService=Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService);
+		var channel=ioService.newChannel(aURL,null,null);
+		channel.asyncOpen(listener, null);
 	}
-}
+	
+};
 

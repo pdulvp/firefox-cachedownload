@@ -1,0 +1,3 @@
+<rules>
+	<rule id="Wikipedia Logos" description="All Wikipedia's logos" isEnabled="false" fileNameExpression="logo_$filename" ruleExpression="http://upload.wikimedia.org/wikipedia/commons/.*Wikipedia-logo" />
+</rules>

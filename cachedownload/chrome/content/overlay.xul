@@ -3,18 +3,34 @@
 
 <!DOCTYPE overlay SYSTEM "chrome://cachedownload/locale/locale.dtd">
 
-<overlay id="cachedownload_overlay"  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<overlay id="cachedownload_overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
 	<script type="application/x-javascript" src="overlay.js"/>
+	<script type="application/x-javascript" src="lib.js"/>
+
+	<stringbundleset id="cachedownload.stringbundleset">
+		<stringbundle id="cachedownload.strings" src="chrome://cachedownload/locale/locale.properties"/>
+	</stringbundleset>
 
 	<toolbarpalette id="BrowserToolbarPalette">
-		
+	
 	   <toolbarbutton id="cachedownload-button-switchmode" 
 	      class="toolbarbutton-1"
 	      type="checkbox"
 	      label="&cachedownload.switchmode;"
-	      tooltiptext="&cachedownload.switchmode;"
-	      oncommand="CacheDownload.switchmode(event);"/>
+	      tooltip="cachedownload-tooltip"
+	      oncommand="CacheDownload.switchmode(event);">
+		  
+		<tooltip id="cachedownload-tooltip" onpopupshowing="CacheDownload.computeInformations(event);">
+		  <label class="header" value="CacheDownload"/>
+		  <label value=""/>
+		  <label value=""/>
+		  <label value=""/>
+		  <label value=""/>
+		  <label value=""/>
+		</tooltip>
+		
+		</toolbarbutton>
 	
 	</toolbarpalette>
 

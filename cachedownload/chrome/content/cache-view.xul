@@ -1,0 +1,45 @@
+﻿<?xml version="1.0"?>
+<!DOCTYPE dialog SYSTEM "chrome://cachedownload/locale/locale.dtd">
+
+<?xml-stylesheet href="chrome://cachedownload/skin/style.css" type="text/css"?>
+<?xml-stylesheet href="chrome://global/skin/global.css"?>
+
+<dialog
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	buttons="accept"
+	title="&cachedownload.options.cacheview.title;"
+	edittitle="edittitle"
+	id="cachedownload-cacheview"
+	onload="CacheDownload.ListView.onLoad()"
+	ondialogcancel="CacheDownload.ListView.onDialogCancel()"
+	ondialogaccept="CacheDownload.ListView.onDialogAccept()"
+	width="740px"
+	height="340px"
+	>
+
+	<script type="application/x-javascript" src="chrome://cachedownload/content/list-view.js"/>
+    <script type="application/x-javascript" src="chrome://cachedownload/content/lib.js"/>
+
+    <hbox flex="1">
+	<vbox flex="1">
+        <tree treelines="true" id="cachedownload-listView-tree" seltype="single" flex="1" 
+			onclick="CacheDownload.ListView.onDetectSelectionRule(event);" 
+			onselect="CacheDownload.ListView.onSelectRule();" 
+			ondblclick="CacheDownload.ListView.onDoubleClickRule();">
+            <treecols>
+              <treecol id="filename" width="130" label="&cachedownload.options.cacheview.filename.label;"/>
+			  <splitter class="tree-splitter"/> 
+			  <treecol id="contentType" width="100" label="&cachedownload.options.cacheview.contentType.label;"/>
+              <splitter class="tree-splitter"/> 
+              <treecol id="evaluatedFilename" width="200" label="&cachedownload.options.cacheview.evaluatedFilename.label;"/>
+              <splitter class="tree-splitter"/> 
+              <treecol id="value" label="&cachedownload.options.cacheview.url.label;" flex="1"/>
+              <splitter class="tree-splitter"/> 
+            </treecols>
+            <treechildren flex="1" onoverflow="displayScrollbarSpacer(true)" onunderflow="displayScrollbarSpacer(false)"/>
+        </tree>
+    </vbox>
+    </hbox>
+	
+
+</dialog>

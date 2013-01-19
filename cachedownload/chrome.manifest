@@ -1,8 +1,8 @@
-content	cachedownload	jar:chrome/cachedownload.jar!/content/
-skin    cachedownload	classic/1.0	jar:chrome/cachedownload.jar!/skin/classic/
+content	cachedownload	chrome/content/
+skin    cachedownload	classic/1.0	chrome/skin/classic/
 
 style	chrome://global/content/customizeToolbar.xul	chrome://cachedownload/skin/style.css
 overlay	chrome://browser/content/browser.xul	chrome://cachedownload/content/overlay.xul
 
-locale	cachedownload	en-US	jar:chrome/cachedownload.jar!/locale/en-US/
-locale	cachedownload	fr-FR	jar:chrome/cachedownload.jar!/locale/fr-FR/
+locale	cachedownload	en-US	chrome/locale/en-US/
+locale	cachedownload	fr-FR	chrome/locale/fr-FR/

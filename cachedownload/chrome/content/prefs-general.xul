@@ -1,0 +1,43 @@
+﻿<?xml version="1.0"?>
+<!DOCTYPE window SYSTEM "chrome://cachedownload/locale/locale.dtd">
+<?xml-stylesheet href="chrome://cachedownload/skin/style.css" type="text/css"?>
+
+
+<overlay id="cachedownload-general-overlay"
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  
+  <prefpane id="paneGeneral" onpaneload="CacheDownload.Options.onLoadGeneralPane();"  >
+  
+	<grid flex="1">
+
+  <columns>
+    <column flex="1"/>
+    <column/>
+  </columns>
+
+  <rows>
+    <row>
+	  <caption label="&cachedownload.options.general.timeCheckCache;"/>
+      <textbox id="cachedownload-timeCheckCache" type="number" min="1000" max="1000000" />
+    </row>
+	
+    <row>
+	  <caption label="&cachedownload.options.general.timeConsecutiveDownload;"/>
+      <textbox id="cachedownload-timeConsecutiveDownload" type="number" min="500" max="100000" />
+    </row>
+	
+    <row>
+	   <caption label="&cachedownload.options.general.MaxSameSize;"/>
+       <textbox id="cachedownload-nbMaxSameSize" type="number" min="3" max="20" />
+    </row>
+	
+  </rows>
+
+</grid>
+
+
+	  
+	
+  </prefpane>
+  
+</overlay>

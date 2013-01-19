@@ -1,0 +1,107 @@
+﻿<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/global.css"?>
+<?xml-stylesheet href="chrome://cachedownload/skin/style.css" type="text/css"?>
+
+<!DOCTYPE dialog SYSTEM "chrome://cachedownload/locale/locale.dtd">
+
+<dialog
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	buttons="accept,cancel"
+	title="&cachedownload.options.title;"
+	id="cachedownload-editRule"
+	onload="CacheDownload.EditRule.onLoad()"
+	ondialogcancel="CacheDownload.EditRule.onDialogCancel()"
+	ondialogaccept="CacheDownload.EditRule.onDialogAccept()"
+	width="480px"
+	height="400px"
+	>
+
+	<script type="application/x-javascript" src="chrome://cachedownload/content/edit-rule.js"/>
+    <script type="application/x-javascript" src="chrome://cachedownload/content/lib.js"/>
+
+	<stringbundleset id="cachedownload.options.stringbundleset">
+		<stringbundle id="cachedownload.options.strings" src="chrome://cachedownload/locale/locale.properties"/>
+	</stringbundleset>
+
+<command id="checkRuleExpression" oncommand="CacheDownload.EditRule.onCheckRuleExpression();"/>
+<command id="checkFileNameExpression" oncommand="CacheDownload.EditRule.onCheckFileNameExpression();"/>
+<command id="showVariables" oncommand="CacheDownload.EditRule.onShowVariables();"/>
+<command id="showFunctions" oncommand="CacheDownload.EditRule.onShowFunctions();"/>
+<command id="menuItemPress" oncommand="CacheDownload.EditRule.onPressMenuItem(event);"/>
+	
+<vbox flex="1">
+	<hbox flex="1">
+	<vbox flex="1">
+	
+	<groupbox>
+		<caption label="&cachedownload.options.editrule.global.label;"/>
+		<grid flex="1">
+	
+		<columns>
+			<column/>
+			<column flex="1"/>
+		</columns>
+	  
+		<rows>
+			<row>
+				<caption label="&cachedownload.options.editrule.identifier.label;"/>
+				<textbox id="tbId" multiline="false"/>
+			</row>
+			<row>
+				<caption label="&cachedownload.options.editrule.description.label;"/>
+				<textbox id="tbDescription" multiline="false"/>
+			</row>
+		</rows>
+	</grid>
+	
+	</groupbox>
+	
+	<groupbox>
+		<caption label="&cachedownload.options.editrule.filenameExpression.label;"/>
+		<hbox flex="1">
+			<textbox flex="1" id="tbFileNameExpression" multiline="false" tooltiptext="&cachedownload.options.helpFileExpression;"/>
+			
+			<button type="menu"  id="btnFunctionsVariablesHelp" tooltiptext="&cachedownload.options.functions;">
+			  <menupopup>
+				<menu label="Functions" class="menu-iconic" id="btnFunctionsHelp" onpopupshowing="CacheDownload.EditRule.initFunctionsMenu();">
+					<menupopup>
+						<menuseparator/>
+						<menuitem label="Select..." command="showFunctions" class="menuitem-iconic" id="btnFunctionsHelp" />
+					</menupopup>
+				</menu>
+				<menu label="Variables" class="menu-iconic"  id="btnVariablesHelp"  onpopupshowing="CacheDownload.EditRule.initVariablesMenu();" >
+					<menupopup>
+						<menuseparator/>
+						<menuitem label="Select..." command="showVariables" class="menuitem-iconic" id="btnVariablesHelp"/>
+					</menupopup>
+				</menu>
+				<menuseparator/>
+				<menuitem label="Inspect..." command="checkFileNameExpression" class="menuitem-iconic" id="btnCheckFileNameExpression" />
+			  </menupopup>
+			</button>
+			
+		</hbox>
+	</groupbox>
+	
+	<groupbox>
+		<caption label="&cachedownload.options.editrule.ruleExpression.label;"/>
+		<hbox flex="1">
+			<textbox flex="1" id="tbRuleExpression" multiline="false" tooltiptext="&cachedownload.options.helpRuleExpression;"/>
+			<button id="btnCheckExpression" command="checkRuleExpression" tooltiptext="&cachedownload.options.checkCache;"/>
+		</hbox>
+	</groupbox>
+	
+	
+</vbox>
+	</hbox>
+	
+	<hbox>
+		<vbox flex="1">
+		<caption id="cachedownload-warning"  label="&cachedownload.warning;"/>
+		<caption id="cachedownload-warning2"  label="&cachedownload.warning2;"/>
+		</vbox>
+	</hbox>
+	
+</vbox>
+
+</dialog>
