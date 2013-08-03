@@ -17,7 +17,7 @@
 			onselect="CacheDownload.Options.onSelectRule();" 
 			ondblclick="CacheDownload.Options.onDoubleClickRule();">
             <treecols>
-              <treecol id="enabledcol" width="28" ignoreincolumnpicker="true"/>
+              <treecol id="enabledcol" width="32" ignoreincolumnpicker="true"/>
               <splitter class="tree-splitter"/> 
 			  <treecol id="namecol" width="130" label="&cachedownload.options.rules.identifier.label;" sortActive="true" ignoreincolumnpicker="true"/>
 			  <splitter class="tree-splitter"/> 

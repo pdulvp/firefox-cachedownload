@@ -9,7 +9,7 @@
 	buttons="accept"
 	title="&cachedownload.options.cacheview.title;"
 	edittitle="edittitle"
-	id="cachedownload-cacheview"
+	id="cachedownload-listView"
 	onload="CacheDownload.ListView.onLoad()"
 	ondialogcancel="CacheDownload.ListView.onDialogCancel()"
 	ondialogaccept="CacheDownload.ListView.onDialogAccept()"

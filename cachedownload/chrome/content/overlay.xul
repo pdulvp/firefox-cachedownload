@@ -8,12 +8,15 @@
 	<script type="application/x-javascript" src="overlay.js"/>
 	<script type="application/x-javascript" src="lib.js"/>
 
-	<stringbundleset id="cachedownload.stringbundleset">
-		<stringbundle id="cachedownload.strings" src="chrome://cachedownload/locale/locale.properties"/>
-	</stringbundleset>
-
+	<window id="main-window">
+		<stringbundleset id="cachedownload.stringbundleset">
+			<stringbundle id="cachedownload.strings" src="chrome://cachedownload/locale/locale.properties"/>
+		</stringbundleset>
+    </window>
+	
 	<toolbarpalette id="BrowserToolbarPalette">
 	
+
 	   <toolbarbutton id="cachedownload-button-switchmode" 
 	      class="toolbarbutton-1"
 	      type="checkbox"

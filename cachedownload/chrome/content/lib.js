@@ -69,9 +69,9 @@
 		this.type = type_p;
 		
 		this.getType = function(index) {
-			if (this.types instanceof Array) {
-				if (index < this.types.length) {
-					return this.types[index];
+			if (this.type instanceof Array) {
+				if (index < this.type.length) {
+					return this.type[index];
 				}
 				return CacheDownload.SharedObjects.TYPE_UNKNOWN;
 			}
@@ -116,8 +116,8 @@
 			var objects = new Array();
 			objects.push(new CacheDownload.SharedObjects.FunctionDefinition("date", [CacheDownload.SharedObjects.TYPE_INTEGER, CacheDownload.SharedObjects.TYPE_STRING] ));
 			objects.push(new CacheDownload.SharedObjects.FunctionDefinition("now", []));
-			//objects.push(new CacheDownload.SharedObjects.FunctionDefinition("add", CacheDownload.SharedObjects.TYPE_INTEGER));
-			//objects.push(new CacheDownload.SharedObjects.FunctionDefinition("mult", CacheDownload.SharedObjects.TYPE_INTEGER));
+			objects.push(new CacheDownload.SharedObjects.FunctionDefinition("add", CacheDownload.SharedObjects.TYPE_INTEGER));
+			objects.push(new CacheDownload.SharedObjects.FunctionDefinition("mult", CacheDownload.SharedObjects.TYPE_INTEGER));
 			//objects.push(new CacheDownload.SharedObjects.FunctionDefinition("getTabByIndex", CacheDownload.SharedObjects.TYPE_XUL_TAB));
 			//objects.push(new CacheDownload.SharedObjects.FunctionDefinition("getFirstItemByClass", CacheDownload.SharedObjects.TYPE_XUL_ELEMENT));
 			//objects.push(new CacheDownload.SharedObjects.FunctionDefinition("getFirstItemById", CacheDownload.SharedObjects.TYPE_XUL_ELEMENT));
@@ -151,8 +151,18 @@
 		this.cacheEntry = aEntryInfo;
 		this.value = aEntryInfo.key;
 		this.filename = CacheDownload.FileUtil.getFileNameFromURL(aEntryInfo.key);
-		this.size = aEntryInfo.dataSize;
+		
+		this.dataSize=aEntryInfo.dataSize;
+		
 		this.lastModifiedDate = aEntryInfo.lastModified;
+		this.lastModified=aEntryInfo.lastModified;
+		
+		this.clientID =aEntryInfo.clientID;
+		this.deviceID=aEntryInfo.deviceID;
+		this.expirationTime=aEntryInfo.expirationTime;
+		this.fetchCount=aEntryInfo.fetchCount;
+		this.lastFetched =aEntryInfo.lastFetched;
+		this.isStreamBased=aEntryInfo.isStreamBased();
 		
 		this.contentType = "";
 		
@@ -175,63 +185,71 @@
 		};
 	},
 	
-	File: function (aEntryInfo, rule_p) {
-		this.key = aEntryInfo.key;
-		this.entryValue = new CacheDownload.SharedObjects.EntryValue(aEntryInfo);
-		this.rule = rule_p;
+	File: function (aEntryValue) {
+		this.key = aEntryValue.key;
+		this.entryValue = aEntryValue;
+		this.rule = null;
 		
 		this.count = 1;
 		this.visited = true;
 		this.isDownloaded = false;
 
-		this.evaluatedFilename = CacheDownload.FileUtil.evaluateExpressionAsFilename(this.rule.fileNameExpression, this.rule, this.entryValue);
+		this.evaluatedFilename = function(aEntryValue) {
+			return CacheDownload.FileUtil.evaluateExpressionAsFilename(this.rule.fileNameExpression, this.rule, this.entryValue);
+		};
+		;
 		
-		this.match = function(aEntryInfo) {
-			return this.key == aEntryInfo.key;
+		this.match = function(aEntryValue) {
+			return this.key == aEntryValue.key;
 		};
 	}, 
 };
 
 CacheDownload.CacheVisitor = {
 	cacheEntries : null,
+	timer: null,
+	
+	cancel : function() {
+		if (CacheDownload.CacheVisitor.timer != null) {
+			CacheDownload.CacheVisitor.timer.cancel();
+		}
+	},
 	
 	triggerVisit : function(callback) {
-		var timer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
+		CacheDownload.CacheVisitor.timer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
 		
-		function timerVisit() {}
+		function timerVisitEntries() {
+		}
 		timerVisitEntries.prototype = {
-			_finalize: function() {
-			},
 			observe: function(aTimer, aTopic, aData) {
 				if (CacheDownload.CacheVisitor.cacheEntries != null && CacheDownload.CacheVisitor.cacheEntries.length>0) {
-					var aEntryInfo = CacheDownload.CacheVisitor.cacheEntries.shift();
-					callback.visitEntry(aEntryInfo);
-					timer.init(new timerVisitEntries(), 50, timer.TYPE_ONE_SHOT);
+					var aEntryInfo2 = CacheDownload.CacheVisitor.cacheEntries.pop();	
+					callback.visitEntry(aEntryInfo2);
+					CacheDownload.CacheVisitor.timer.init(this, 0, CacheDownload.CacheVisitor.timer.TYPE_ONE_SHOT);
 				} else {
 					callback.afterVisitEntries();
 				}
 			}
 		};
 		
-		function timerTriggerVisit() {}
+		function timerTriggerVisit() {
+		}
 		timerTriggerVisit.prototype = {
-			_finalize: function() {
-			},
 			observe: function(aTimer, aTopic, aData) {
 				CacheDownload.CacheVisitor.initVisit();
 				callback.beforeVisitEntries();
 				var cacheService = Components.classes["@mozilla.org/network/cache-service;1"].getService(Components.interfaces.nsICacheService);
 				cacheService.visitEntries(CacheDownload.CacheVisitor);
-				timer.init(new timerVisitEntries(), 50, timer.TYPE_ONE_SHOT);
+				CacheDownload.CacheVisitor.timer.init(new timerVisitEntries(), 0, CacheDownload.CacheVisitor.timer.TYPE_ONE_SHOT);
 			}
 		};
-		
-		timer.init(new timerTriggerVisit(), 100, timer.TYPE_ONE_SHOT);
+
+		CacheDownload.CacheVisitor.timer.init(new timerTriggerVisit(), 0, CacheDownload.CacheVisitor.timer.TYPE_ONE_SHOT);
 	},
 	
 	// ***** nsICacheVisitor *****
 	initVisit: function () {
-		this.cacheEntries = new Array();
+		CacheDownload.CacheVisitor.cacheEntries = new Array();
 	},
 	
 	// ***** nsICacheVisitor *****
@@ -240,11 +258,11 @@ CacheDownload.CacheVisitor = {
 	},
 	
 	visitEntry: function (aDeviceID, aEntryInfo) {
-		this.cacheEntries.push(aEntryInfo);
+		var customEntryInfo = new CacheDownload.SharedObjects.EntryValue(aEntryInfo);
+		CacheDownload.CacheVisitor.cacheEntries.push(customEntryInfo);
 		return true;
 	},
 };
-
 
 CacheDownload.SharedObjects.RulerParser = {
 	
@@ -358,12 +376,12 @@ CacheDownload.FileUtil={
 		
 		//Remove any weird characters
 		expressionValue=expressionValue.replace(/\s/g, " ");
-		expressionValue=expressionValue.replace(/[^\w _0-9\(\)\-'"\.àáâãäåçèéêëìíîïðòóôõöùúûüýÿ]/g, "");
+		expressionValue=expressionValue.replace(/[^\w _0-9:;,\(\)\-'"\.àáâãäåçèéêëìíîïðòóôõöùúûüýÿ]/g, "");
 		
 		return expressionValue;
 	},
 	
-	getFileNameFromURL: function CV_getFileNameFromURL(aURL) {
+	getFileNameFromURL: function(aURL) {
 		var fileNameFromKey = aURL;
 		var regSpearator = null;
 		var segments = null;
@@ -393,7 +411,7 @@ CacheDownload.FileUtil={
 		return fileNameFromKey;
 	},
 	
-	getTabByIndex: function CV_getTabByIndex(index_p) {
+	getTabByIndex: function(index_p) {
 		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"].getService(Components.interfaces.nsIWindowMediator);
 		var browserEnumerator = wm.getEnumerator("navigator:browser");
 		
@@ -412,7 +430,7 @@ CacheDownload.FileUtil={
 		return null;
 	}, 
 	
-	getFirstTabItemClass: function CV_getFirstTab(className) {
+	getFirstTabItemClass: function(className) {
 		var doc = this.getTabByIndex(0);
 		if (doc != null) {
 			var res = this.getFirstItemWithClass(doc, className);
@@ -423,7 +441,7 @@ CacheDownload.FileUtil={
 		return null;
 	}, 
 
-	getFirstItemWithClass: function CV_getFirstItem(document, className) {
+	getFirstItemWithClass: function(document, className) {
 		var attr = document.evaluate("//*[@class='"+className+"']", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null );
 		if (attr!=null) {
 			if (attr.singleNodeValue!=null) {
@@ -433,12 +451,8 @@ CacheDownload.FileUtil={
 		return attr;
 	},
 	
-	myInternalSave : function CV_myInternalSave(aURL, aBaseName, consecutive)
+	myInternalSave : function(aURL, aBaseName, consecutive)
 	{
-		//saveURL(aURL, aFileName, aFilePickerTitleKey, aShouldBypassCache, aSkipPrompt, aReferrer);
-		//internalSave(aURL, null, aFileName, null, null, aShouldBypassCache, aFilePickerTitleKey, null, aReferrer, aSkipPrompt);
-		//internalSave(aURL, aDocument, aDefaultFileName, aContentDisposition, aContentType, aShouldBypassCache, aFilePickerTitleKey, aChosenData, aReferrer, aSkipPrompt);
-     
 		var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
 		
 		var saveModeParam = 0x00; //SAVEMODE_FILEONLY ;//GetSaveModeForContentType(null);
@@ -512,9 +526,15 @@ CacheDownload.FileUtil={
 			observe: function(aTimer, aTopic, aData) {
 				var transfer = Components.classes["@mozilla.org/transfer;1"].createInstance(Components.interfaces.nsITransfer);
 				aConsoleService.logStringMessage("[cachedownload] save file: "+target_fileInfo.fileName+"."+target_fileInfo.fileExt);
-				transfer.init(persistArgs.source, persistArgs.target, "", null, null, null, persist);
+				transfer.init(persistArgs.source, persistArgs.target, "", null, null, null, persist, true);
 				persist.progressListener = new DownloadListener(window, transfer);
-				persist.saveURI(persistArgs.source, persistArgs.fileCacheKey, null, persistArgs.postData, null, persistArgs.target);
+				
+				var privacyContext = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+                .getInterface(Components.interfaces.nsIWebNavigation)
+                .QueryInterface(Components.interfaces.nsILoadContext);
+
+				persist.saveURI(persistArgs.source, persistArgs.fileCacheKey, null, 
+						persistArgs.postData, null, persistArgs.target, privacyContext);
 			}
 		};
 		
@@ -531,13 +551,13 @@ CacheDownload.Locale = {
 		} catch (error) {}
 		
 		//There is probably a better way :)
-		if (param0_p) {
+		if (param0_p != null && param0_p != undefined) {
 			result=result.replace(/\{0\}/g, param0_p);
 		}
-		if (param1_p) {
+		if (param1_p != null && param1_p != undefined) {
 			result=result.replace(/\{1\}/g, param1_p);
 		}
-		if (param2_p) {
+		if (param2_p != null && param2_p != undefined) {
 			result=result.replace(/\{2\}/g, param2_p);
 		}
 		return result;
@@ -568,7 +588,7 @@ CacheDownload.AnalyseParser = {
 	
 	//A small langage parser based on simple graph
 	AP_Empty 	: { id:"AP_Empty", 		matche: function (chr) { return true; } },
-	AP_String 	: { id:"AP_String", 	matche: function (chr) { return /[\w _0-9\-'"\.àáâãäåçèéêëìíîïðòóôõöùúûüýÿ]/.test(chr); } },
+	AP_String 	: { id:"AP_String", 	matche: function (chr) { return /[\w :;_0-9\-'"\.àáâãäåçèéêëìíîïðòóôõöùúûüýÿ]/.test(chr); } },
 	AP_Quote 	: { id:"AP_Quote", 		matche: function (chr) { return chr=="\'"; } },
 	AP_Dollar 	: { id:"AP_Dollar", 	matche: function (chr) { return chr=="$"; } },
 	AP_Number 	: { id:"AP_Number", 	matche: function (chr) { return /\d/.test(chr); } },
@@ -763,7 +783,7 @@ CacheDownload.AnalyseParser = {
 			return new CacheDownload.AnalyseParser.LexemeValue(variableDefinition_p.type, value);
 			
 		} else if ("size" == variableDefinition_p.key) {
-			var value = (entryValue == null ? 100 : entryValue.size);
+			var value = (entryValue == null ? 0 : entryValue.dataSize);
 			return new CacheDownload.AnalyseParser.LexemeValue(variableDefinition_p.type, value);
 			
 		} else if ("lastModifiedDate" == variableDefinition_p.key) {
@@ -806,23 +826,23 @@ CacheDownload.AnalyseParser = {
 			if (childs.length>=2){
 				format = childs[1].value;
 			}
-			if (childs.length>=1){
-				date = childs[0].value;
+			if (childs.length>=1 && !isNaN(childs[0].value)){
+				date.setTime(childs[0].value);
 			}
 			
-			var result = format;
-			
+			var result = format+"_";
 			//where is the preg_remplace(patterns, replacements, string) ?
-			result=result.replace(/YYYY/g, cDate.getFullYear());
-			result=result.replace(/YY/g, (cDate.getFullYear() % 100));
-			result=result.replace(/([^m])?m/g, $1 + cDate.getMonth());
-			result=result.replace(/([^d])?d/g, $1 + cDate.getDate());
-			result=result.replace(/([^h])?h/g, $1 + cDate.getHours());
-			result=result.replace(/([^M])?M/g, $1 + cDate.getMinutes());
-			result=result.replace(/([^s])?s/g, $1 + cDate.getSeconds());
-			result=result.replace(/([^w])?w/g, $1 + cDate.getDay());
+			result=result.replace(/YYYY/g, date.getFullYear());
+			result=result.replace(/YY/g, ((date.getFullYear() % 100)<10?"0":"") +(date.getFullYear() % 100));
+			result=result.replace(/m?m([^m])/g,  (date.getMonth()<10?"0":"") +date.getMonth() + "$1");
+			result=result.replace(/d?d([^d])/g,  (date.getDate()<10?"0":"")+ date.getDate() + "$1");
+			result=result.replace(/h?h([^h])/g,  (date.getHours()<10?"0":"") +date.getHours() + "$1");
+			result=result.replace(/M?M([^M])/g,  (date.getMinutes()<10?"0":"")+ date.getMinutes() + "$1");
+			result=result.replace(/s?s([^s])/g,  (date.getSeconds()<10?"0":"") +date.getSeconds() + "$1");
+			result=result.replace(/w?w([^w])/g,  + (date.getDay()<10?"0":"")+ date.getDay() + "$1");
 			result=result.replace(/[mdhMsw]/g, '0');
 			
+			result = result.substr(0, result.length-1);
 			return new CacheDownload.AnalyseParser.LexemeValue(CacheDownload.SharedObjects.TYPE_STRING, result);
 		}
 		
@@ -927,7 +947,7 @@ CacheDownload.AnalyseParser = {
 		var lexeme = this.lexical(string);
 		this.reduce(lexeme);
 		var result = lexeme.toCompleteExpression();
-
+		
 		if (string != result) {
 			results.push(new CacheDownload.SharedObjects.KeyValue(CacheDownload.AnalyseParser.INSPECT_DIFFERENT_EXPRESSION_AFTER_PARSING, result));
 			

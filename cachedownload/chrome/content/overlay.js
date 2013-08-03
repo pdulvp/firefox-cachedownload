@@ -47,7 +47,7 @@
 	getEnabledRulesCount : function(locale) {
 		var count = 0;
 		if (this.rules != null) {
-			for (var i = 0; i < childNodes.length; i++) {
+			for (var i = 0; i < this.rules.length; i++) {
 				if (this.rules[i].isEnabled) {
 					count = count+1;
 				}
@@ -60,7 +60,7 @@
 		if (this.lastTimeCheck == null) {
 			return CacheDownload.Locale.getString(locale, "cachedownload.status.unknown");
 		}
-		return this.lastTimeCheck.getTime();
+		return this.lastTimeCheck.toLocaleDateString() + " " + this.lastTimeCheck.toLocaleTimeString();
 	},
 	
 	getPreviouslyMatchedItemsCount : function(locale) {
@@ -74,20 +74,23 @@
 		if (this.lastDownloadedFile == null) {
 			return CacheDownload.Locale.getString(locale, "cachedownload.status.unknown");
 		}
-		return CacheDownload.Locale.getString(locale, "cachedownload.status.filename", this.lastDownloadedFile.evaluatedFilename, this.lastDownloadedFile.rule.id);
+		return CacheDownload.Locale.getString(locale, "cachedownload.status.filename", this.lastDownloadedFile.evaluatedFilename2, this.lastDownloadedFile.rule.id);
 	},
 	
 	computeInformations : function(event) {
 		var object = document.getElementById("cachedownload-tooltip");
-		var content = new Array();
+		if (object == null) {
+			return;
+		}
 		
+		var content = new Array();
 		var locale = this.getLocale();
 		if (CacheDownload.enabled) {
 			content.push(CacheDownload.Locale.getString(locale, "cachedownload.status.enabled"));
 			content.push(CacheDownload.Locale.getString(locale, "cachedownload.status.enabledRules", this.getEnabledRulesCount(locale)));
 			content.push(CacheDownload.Locale.getString(locale, "cachedownload.status.lastTimeCheck", this.getLastTimeCheck(locale)));
 			content.push(CacheDownload.Locale.getString(locale, "cachedownload.status.previouslyMatchedItems", this.getPreviouslyMatchedItemsCount(locale)));
-			content.push(CacheDownload.Locale.getString(locale, "cachedownload.status.lastDownloadedFileName", this.lastDownloadedFilename(locale)));
+			content.push(CacheDownload.Locale.getString(locale, "cachedownload.status.lastDownloadedFileName", this.getLastDownloadedFilename(locale)));
 			
 		} else {
 			content.push(CacheDownload.Locale.getString(locale, "cachedownload.status.disabled"));
@@ -112,11 +115,10 @@
 		if (object!=null) {
 			CacheDownload.enabled=object.hasAttribute("checked");
 		}
-		var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].
-	    getService(Components.interfaces.nsIConsoleService);
+		var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
 		
 		if (CacheDownload.enabled) {
-			
+			aConsoleService.logStringMessage("[cachedownload] enabled");
 			this.loadPreferences();
 			this.triggerCheck();
 			
@@ -124,13 +126,15 @@
 			aConsoleService.logStringMessage("[cachedownload] disabled");
 			if (this.timer!=null) {
 				this.timer.cancel();
+				CacheDownload.CacheVisitor.cancel();
 			}
 		}
 		
 	},
 	
 	triggerCheck : function() {
-	
+		var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
+		
 		function timerCallback() {}
 		timerCallback.prototype = {
 			_finalize: function() {
@@ -140,7 +144,6 @@
 			}
 		};
 		
-		aConsoleService.logStringMessage("[cachedownload] enabled");
 		aConsoleService.logStringMessage("[cachedownload] next check triggered : "+CacheDownload.TIMER_CACHE_CHECK+" ms");
 		
 		if (this.timer == null) {
@@ -151,15 +154,15 @@
 		
 	},
 	
-	visitEntry: function (aEntryInfo) {
+	visitEntry: function (aEntryValue) {
 		
 		var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
 		
-		if (aEntryInfo.dataSize == 0) {
+		if (aEntryValue.dataSize == 0) {
 			return true;
 		}
 		
-		//aConsoleService.logStringMessage("Cached entry : "+aEntryInfo.key + " l = "+this.rules.length);
+		//aConsoleService.logStringMessage("Cached entry : "+aEntryValue.key + " l = "+this.rules.length);
 		
 		if (this.files==null) {
 			this.files=new Array();
@@ -167,20 +170,19 @@
 		
 		for (var i=0; i<this.rules.length; i++) {
 		
-			if (this.rules[i].isEnabled && this.rules[i].match(aEntryInfo)) {
+			if (this.rules[i].isEnabled && this.rules[i].match(aEntryValue)) {
 				
-				this.previouslyMatchedItemsCount = this.previouslyMatchedItemsCount + 1;
 				
 				//Find index of key, -1 otherwise
 				var index = -1;
 				for (var j=0; j<this.files.length;j++) {
-					if (this.files[j]!=null && this.files[j].match(aEntryInfo)) {
+					if (this.files[j]!=null && this.files[j].match(aEntryValue)) {
 						index = j;
 					}
 				}
 				//If not found, insert into array at an empty position
 				if (index==-1) {
-					//aConsoleService.logStringMessage("Match that : "+aEntryInfo.key);
+					//aConsoleService.logStringMessage("Match that : "+aEntryValue.key);
 					
 					var indexInsert = this.files.length;
 					for (var j=0; j<this.files.length;j++) {
@@ -188,8 +190,9 @@
 							indexInsert=j;
 						}
 					}
-					var file = new CacheDownload.SharedObjects.File(aEntryInfo, this.rules[i]);
+					var file = new CacheDownload.SharedObjects.File(aEntryValue);
 					this.files[indexInsert]=file;
+					this.previouslyMatchedItemsCount = this.previouslyMatchedItemsCount + 1;
 					
 				} else { //If found
 					//If already downloaded
@@ -197,13 +200,16 @@
 						return true;
 					}
 					
-					//aConsoleService.logStringMessage("[cachedownload] rule '"+this.rules[i].id+"' matches an item: "+ aEntryInfo.key);
+					this.previouslyMatchedItemsCount = this.previouslyMatchedItemsCount + 1;
+				
+					//aConsoleService.logStringMessage("[cachedownload] rule '"+this.rules[i].id+"' matches an item: "+ aEntryValue.key);
 		
 					this.files[index].visited=true;
+					this.files[index].rule = this.rules[i];
 					
 					//If size is different, reset to new size
-					if (this.files[index].size!=aEntryInfo.dataSize) {
-						this.files[index].size=aEntryInfo.dataSize;
+					if (this.files[index].size!=aEntryValue.dataSize) {
+						this.files[index].size=aEntryValue.dataSize;
 						this.files[index].count=1;
 					
 					//If size is equals, wait 3 timer..
@@ -246,6 +252,7 @@
 		}
 		
 		this.lastTimeCheck = new Date();
+		this.computeInformations(null);
 		this.triggerCheck();
 	},
 
@@ -256,8 +263,10 @@
 		//Enhance precondition :)
     	if (this.files[index].size<10) return;
     	
-		var filename = this.files[index].evaluatedFilename;
+		var filename = this.files[index].evaluatedFilename();
+		this.files[index].evaluatedFilename2 = filename;
 		this.lastDownloadedFile = this.files[index];
+		this.computeInformations(null);
 		
 		CacheDownload.FileUtil.myInternalSave(key, filename, CacheDownload.TIMER_DOWNLOAD_CONSECUTIVE);
 		
@@ -284,7 +293,6 @@
 	
 	observe: function(branch, name) {
 		CacheDownload.rules = new Array();
-		
 		//Load rules
 		var storedRules = CacheDownload.prefs.service.getCharPref('rules');
 		if (storedRules!=null && storedRules!=undefined && storedRules.length>0) {
@@ -309,7 +317,6 @@
 	},
 	
 	addRule : function(rule) {
-		var infos = new Array();
 		var contains = false;
 		for (var k=0; k<CacheDownload.rules.length;k++) {
 			if (CacheDownload.rules[k].id == rule.id) {

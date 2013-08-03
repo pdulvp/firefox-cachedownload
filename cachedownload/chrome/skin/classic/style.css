@@ -1,4 +1,4 @@
-﻿@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
 
 #cachedownload-button-switchmode[disabled="true"]  {
   list-style-image: url("chrome://cachedownload/skin/icon24.png");
@@ -19,8 +19,8 @@ window:not([active="true"]) #cachedownload-button-switchmode  {
   list-style-image: url("chrome://cachedownload/skin/toolbar-button.png");
 }
 
-radio[pane=paneGeneral] {		-moz-image-region: rect(0 24px 24px 0)}
-radio[pane=paneRules] {		-moz-image-region: rect(0 48px 24px 24px)}
+radio[pane=paneGeneral] {		-moz-image-region: rect(0 32px 32px 0)}
+radio[pane=paneRules] {		-moz-image-region: rect(0 64px 32px 32px)}
 
 #btnVariablesHelp {
   list-style-image: url("chrome://cachedownload/skin/variables.png");
@@ -81,7 +81,6 @@ radio[pane=paneRules] {		-moz-image-region: rect(0 48px 24px 24px)}
 	margin-bottom:10px;
 }
 
-
 #cachedownload-info-editRule {
     list-style-image: url("chrome://cachedownload/skin/help.png");
     background-color:#DDFFFF;
@@ -101,13 +100,9 @@ treechildren::-moz-tree-image(key) {
 treechildren::-moz-tree-image(enabledcol enabled-false) {
 	padding-left:4px;
 	padding-right:4px;
-	list-style-image: url(checkbox.png);
-	-moz-image-region: rect(13px 13px 26px 0px);
 }
 
 treechildren::-moz-tree-image(enabledcol enabled-true) {
 	padding-left:4px;
 	padding-right:4px;
-	list-style-image: url(checkbox.png);
-	-moz-image-region: rect(0px 13px 13px 0px);
 }

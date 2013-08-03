@@ -19,7 +19,7 @@
 <!ENTITY cachedownload.options.editrule.description.label "Description">
 <!ENTITY cachedownload.options.editrule.filenameExpression.label "Filename expresssion">
 <!ENTITY cachedownload.options.editrule.global.label "Global">
-<!ENTITY cachedownload.options.editrule.ruleExpression.label "Regular expression to match cache items">
+<!ENTITY cachedownload.options.editrule.ruleExpression.label "Regular expression to match files">
 
 <!ENTITY cachedownload.options.general.label "Main">
 <!ENTITY cachedownload.options.general.timeCheckCache "Time between two cache checks (ms)">
@@ -32,7 +32,7 @@
 
 <!ENTITY cachedownload.options.cacheview.title "Cache viewer">
 <!ENTITY cachedownload.options.cacheview.filename.label "Filename">
-<!ENTITY cachedownload.options.cacheview.evaluatedFilename.label "Output">
+<!ENTITY cachedownload.options.cacheview.evaluatedFilename.label "Output filename">
 <!ENTITY cachedownload.options.cacheview.contentType.label "Content-Type">
 <!ENTITY cachedownload.options.cacheview.url.label "URL">
 
@@ -48,7 +48,7 @@
 <!ENTITY cachedownload.warning " Ensure you don't infringe any copyright laws by downloading files">
 <!ENTITY cachedownload.warning2 " Without support, creation is dead">
 <!ENTITY cachedownload.options.helpRuleExpression "Insert a regular expression here">
-<!ENTITY cachedownload.options.helpFileExpression "Insert here file name expression used to saved cache item">
+<!ENTITY cachedownload.options.helpFileExpression "Insert here file name expression used to saved file">
 <!ENTITY cachedownload.options.functions "Display all predefined functions">
 <!ENTITY cachedownload.options.predefinedVariables "Display all predefined variables">
 <!ENTITY cachedownload.options.checkCache "Retrieve cache elements matched by current expression">

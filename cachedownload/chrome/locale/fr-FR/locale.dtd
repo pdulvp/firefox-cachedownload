@@ -37,11 +37,11 @@
 <!ENTITY cachedownload.options.cacheview.url.label "URL">
 
 <!ENTITY cachedownload.options.variables.title "Variables">
-<!ENTITY cachedownload.options.variables.name.label "Name">
+<!ENTITY cachedownload.options.variables.name.label "Nom">
 <!ENTITY cachedownload.options.variables.description.label "Description">
 
-<!ENTITY cachedownload.options.functions.title "Functions">
-<!ENTITY cachedownload.options.functions.name.label "Name">
+<!ENTITY cachedownload.options.functions.title "Fonctions">
+<!ENTITY cachedownload.options.functions.name.label "Nom">
 <!ENTITY cachedownload.options.functions.format.label "Format">
 <!ENTITY cachedownload.options.functions.description.label "Description">
 

@@ -8,10 +8,15 @@
   
   <prefpane id="paneGeneral" onpaneload="CacheDownload.Options.onLoadGeneralPane();"  >
   
+    <vbox flex="1">
+	<hbox flex="1">
+    
+  
 	<grid flex="1">
 
   <columns>
     <column flex="1"/>
+    <column/>
     <column/>
   </columns>
 
@@ -19,6 +24,7 @@
     <row>
 	  <caption label="&cachedownload.options.general.timeCheckCache;"/>
       <textbox id="cachedownload-timeCheckCache" type="number" min="1000" max="1000000" />
+	  <caption label=" "/>
     </row>
 	
     <row>
@@ -35,6 +41,8 @@
 
 </grid>
 
+	</hbox>
+    </vbox>
 
 	  
 	

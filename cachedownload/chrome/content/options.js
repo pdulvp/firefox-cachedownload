@@ -44,16 +44,7 @@ CacheDownload.Options = {
   cycleHeader: function(columnID, element) {
     
   },
-  getCellProperties: function(row, columnID, properties) { 
-
-    var atomService = Components.classes["@mozilla.org/atom-service;1"].getService(Components.interfaces.nsIAtomService);
-	if (this.isRuleEnabled(row)) {
-		properties.AppendElement(atomService.getAtom("enabled-true"));
-	} else {
-		properties.AppendElement(atomService.getAtom("enabled-false"));
-	}
-
-  },
+  
   getCellText: function(row, column) {
 	if (column == "namecol" || column.id == "namecol") {
       return this.getRuleName(row);
@@ -63,18 +54,17 @@ CacheDownload.Options = {
     }
     return null;
 	},
-  getColumnProperties: function(columnID, element, properties) {  },
+	
   getImageSrc: function(rowIndex, column) {
-  	/*if (column == "enabledcol" || column.id == "enabledcol") {
+  	if (column == "enabledcol" || column.id == "enabledcol") {
   		if (this.isRuleEnabled(rowIndex)) {
   			return "chrome://cachedownload/skin/enabled.png";
   		} else {
   			return "chrome://cachedownload/skin/disabled.png";
   		}
-  	}*/
+  	}
   	return null;
   },
-  getRowProperties: function(rowIndex, properties) {  },
   isContainer: function(index) { return false; },
   isSeparator: function(index) { return false; },
   isSorted: function(index) { /* return false; */ },
@@ -107,7 +97,6 @@ CacheDownload.Options = {
 		//init preference accesser
 		this._prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService);
 		this._prefs = this._prefs.getBranch("extensions.cachedownload.");
-		
 		this.rules = [];
 		
 		var prefValue = this._prefs.getCharPref('rules');

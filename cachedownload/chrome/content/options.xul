@@ -10,7 +10,7 @@
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
     onload="CacheDownload.Options.onLoad();"
     onunload="CacheDownload.Options.onDialogAccept();"
-	width="550px"
+	width="600px"
 	height="370px">
 
     <script type="application/x-javascript" src="chrome://cachedownload/content/options.js"/>

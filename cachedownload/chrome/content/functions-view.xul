@@ -9,11 +9,11 @@
 	buttons="accept"
 	title="&cachedownload.options.functions.title;"
 	edittitle="edittitle"
-	id="cachedownload-functions"
+	id="cachedownload-listView"
 	onload="CacheDownload.ListView.onLoad()"
 	ondialogcancel="CacheDownload.ListView.onDialogCancel()"
 	ondialogaccept="CacheDownload.ListView.onDialogAccept()"
-	width="430px"
+	width="530px"
 	height="340px"
 	>
 
@@ -22,14 +22,12 @@
 
     <hbox flex="1">
 	<vbox flex="1">
-        <tree treelines="true" id="cachedownload-functions-tree" seltype="single" hidecolumnpicker="true" flex="1" 
+        <tree treelines="true" id="cachedownload-listView-tree" seltype="single" hidecolumnpicker="true" flex="1" 
 			onclick="CacheDownload.ListView.onDetectSelectionElement(event);" 
 			onselect="CacheDownload.ListView.onSelectElement();" 
 			ondblclick="CacheDownload.ListView.onDoubleClickElement();">
             <treecols>
-              <treecol id="name" width="80" label="&cachedownload.options.functions.name.label;" ignoreincolumnpicker="true"/>
-			  <splitter class="tree-splitter"/> 
-			  <treecol id="format" label="&cachedownload.options.functions.format.label;" flex="1" ignoreincolumnpicker="true"/>
+              <treecol id="format" width="120" label="&cachedownload.options.functions.format.label;" ignoreincolumnpicker="true"/>
               <splitter class="tree-splitter"/> 
               <treecol id="description" label="&cachedownload.options.functions.description.label;" flex="1" ignoreincolumnpicker="true"/>
               <splitter class="tree-splitter"/> 

@@ -10,7 +10,6 @@ CacheDownload.ListView={
 			var listener = window.arguments[0];
 			this.objects = listener.objects;
 			listener.fCallback = this;
-			
 		} else {
 			this.objects = new Array();
 		}
@@ -47,16 +46,12 @@ CacheDownload.ListView={
   cycleHeader: function(columnID, element) {
    
   },
-  getCellProperties: function(row, columnID, properties) { 
-
-  },
   getCellText: function(row, column) {
 	return this.objects[row][column.id];
   },
-  getColumnProperties: function(columnID, element, properties) { },
+  
   getImageSrc: function(rowIndex, column) {	
 	return this.objects[rowIndex]["img_"+column.id]; },
-  getRowProperties: function(rowIndex, properties) { },
   isContainer: function(index) { return false; },
   isSeparator: function(index) { return false; },
   isSorted: function(index) { },
@@ -90,10 +85,11 @@ CacheDownload.ListView={
 	}, 
 	onDialogAccept: function() {
 		if (this.treeRules.view.selection.getRangeCount()==0) {
-			return;
+			return false;
 		}
 		window.arguments[1]["index"]=this.treeRules.currentIndex;
 		window.arguments[1]["data"]=this.objects[this.treeRules.currentIndex];
+		return true;
 	},
 	
 };

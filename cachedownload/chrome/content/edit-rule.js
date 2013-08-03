@@ -43,11 +43,11 @@ CacheDownload.EditRule={
 	},
 	
 	onShowVariables: function() {
-		return this.onShowItems(this.rule.predefinedVariables(), "variables", ["name", "format", "description"]);
+		return this.onShowItems(this.rule.predefinedVariables(), "variables", ["name", "description"]);
 	},
 	
 	onShowFunctions: function() {
-		return this.onShowItems(this.rule.predefinedFunctions(), "functions", ["name", "description"]);
+		return this.onShowItems(this.rule.predefinedFunctions(), "functions", ["format", "description"]);
 	},
 	
 	onShowItems : function(objects, type, content) {
@@ -56,24 +56,20 @@ CacheDownload.EditRule={
 		this.listener.init();
 		
 		var locale = this.getLocale();
-		
 		for (var i=0; i<objects.length; i++) {
 			var id = objects[i].key;
-			var object = new new CacheDownload.SharedObjects.ListViewItem();
+			var object = new CacheDownload.SharedObjects.ListViewItem();
 			object.source = objects[i];
 			for (var p=0; p<content.length; p++) {
 				object[content[p]] = CacheDownload.Locale.getString(locale, "cachedownload.options.editrule."+type+"."+id+"."+content[p]);
 			}
 			this.listener.add(object);
 		}
-		
 		openDialog(type+"-view.xul", "_blank", "chrome,centerscreen,modal,resizable,dialog=no", CacheDownload.EditRule.listener, result);
 
 		if (("index" in result)) {
 			this.insertDataOnFileNameExpression(objects[result["index"]].getEditText());
 		}
-		if (!("status" in result))
-			return;
 	},
 	
 	getLocale: function() {
@@ -98,7 +94,7 @@ CacheDownload.EditRule={
 	},
 	
 	onPressMenuItem: function(event) {
-		this.insertDataOnFileNameExpression(event.target.getAttribute("value"));
+		CacheDownload.EditRule.insertDataOnFileNameExpression(event.target.getAttribute("value"));
 	},
 	
 	evaluate: function(entryValue) {
@@ -116,20 +112,19 @@ CacheDownload.EditRule={
 		
 		var locale = this.getLocale();
 		for(var k=0; k<results.length;k++) {
-			if (results[k].key == CacheDownload.AnalyseParserINSPECT_ALL_VALID) {
+			if (results[k].key == CacheDownload.AnalyseParser.INSPECT_ALL_VALID) {
 				res = res + CacheDownload.Locale.getString(locale, "cachedownload.inspect.wellformed");
 				
-			} else if (results[k].key == CacheDownload.INSPECT_UNKNOWN_VARIABLE) {
+			} else if (results[k].key == CacheDownload.AnalyseParser.INSPECT_UNKNOWN_VARIABLE) {
 				res = res + tiret + CacheDownload.Locale.getString(locale, "cachedownload.inspect.unknownVariable", results[k].value) + br;
 				
-			} else if (results[k].key == CacheDownload.INSPECT_UNKNOWN_FUNCTION) {
+			} else if (results[k].key == CacheDownload.AnalyseParser.INSPECT_UNKNOWN_FUNCTION) {
 				res = res + tiret + CacheDownload.Locale.getString(locale, "cachedownload.inspect.unknownFunction", results[k].value) + br;
 				
-			} else if (results[k].key == CacheDownload.INSPECT_DIFFERENT_EXPRESSION_AFTER_PARSING) {
+			} else if (results[k].key == CacheDownload.AnalyseParser.INSPECT_DIFFERENT_EXPRESSION_AFTER_PARSING) {
 				res = res + tiret + CacheDownload.Locale.getString(locale, "cachedownload.inspect.differentExpression", results[k].value) + br;
 			}
 		}
-		
 		alert(res);
 	},
 	
@@ -149,7 +144,7 @@ CacheDownload.EditRule={
 			var mItem = document.createElement("menuitem");
 			mItem.setAttribute("label", objects[k].getText());
 			mItem.setAttribute("value", objects[k].getEditText());
-			mItem.setAttribute("oncommand", "CacheDownload.EditRule.onPressMenuItem(event);");
+			mItem.addEventListener("command", CacheDownload.EditRule.onPressMenuItem, false);
 			menu.insertBefore(mItem, menuItem);
 		}
 	},
@@ -161,10 +156,7 @@ CacheDownload.EditRule={
 		CacheDownload.EditRule.listener.init();
 		
 		CacheDownload.CacheVisitor.triggerVisit(CacheDownload.EditRule);
-		openDialog("cache-view.xul", "_blank", "chrome,centerscreen,modal,resizable,dialog=no", CacheDownload.EditRule.listener, null, result);
-		
-		if (!("status" in result))
-			return;
+		openDialog("cache-view.xul", "_blank", "chrome,centerscreen,modal,resizable,dialog=no", CacheDownload.EditRule.listener, result);
 	}, 
 	
 	beforeVisitEntries: function() {
@@ -173,12 +165,13 @@ CacheDownload.EditRule={
 	afterVisitEntries: function() {
 	},
 	
-	visitEntry: function (aEntryInfo) {
+	visitEntry: function (aEntryValue) {
+			try {
 		var icon = "unknown";
-		var value = new CacheDownload.SharedObjects.EntryValue(aEntryInfo); 
+		var value = aEntryValue;
 		value.evaluatedFilename = CacheDownload.EditRule.evaluate(value);
 		
-		if (this.match && this.match.exec(aEntryInfo.key)) {
+		if (CacheDownload.EditRule.match && CacheDownload.EditRule.match.exec(aEntryValue.key)) {
 			//filename from key
 			var ext = value.filename.split("\.")
 			if (ext.length>1) {
@@ -188,7 +181,7 @@ CacheDownload.EditRule={
 			
 			try {
 				var cacheService = Components.classes["@mozilla.org/network/cache-service;1"].getService(Components.interfaces.nsICacheService);
-				var session = cacheService.createSession(aEntryInfo.clientID, Components.interfaces.nsICache.STORE_ANYWHERE, aEntryInfo.isStreamBased());
+				var session = cacheService.createSession(aEntryValue.clientID, Components.interfaces.nsICache.STORE_ANYWHERE, aEntryValue.isStreamBased);
 				session.doomEntriesIfExpired = false;
 				
 				function cacheListener(entryValue_p, icon_p) {
@@ -196,7 +189,7 @@ CacheDownload.EditRule={
 					this.aIcon = icon_p;
 				}
 				cacheListener.prototype = {
-					entryValue : "",
+					entryValue : null,
 					aIcon : "",
 					onCacheEntryAvailable : function(descriptor, accessGranted, status) {
 						try {
@@ -223,11 +216,14 @@ CacheDownload.EditRule={
 					}
 				};
 				
-				var descriptor = session.asyncOpenCacheEntry(aEntryInfo.key, Components.interfaces.nsICache.ACCESS_READ, new cacheListener(value, icon));
+				var descriptor = session.asyncOpenCacheEntry(aEntryValue.key, Components.interfaces.nsICache.ACCESS_READ, new cacheListener(value, icon));
 				
 			} catch(e) {
 			}
 		
 		}
+		} catch(aae) {
+			}
+			
 	}
 };
