@@ -451,6 +451,11 @@ CacheDownload.FileUtil={
 		return attr;
 	},
 	
+	
+	callbackSave: function(data) {
+		
+	}, 
+	
 	myInternalSave : function(aURL, aBaseName, consecutive)
 	{
 		var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
@@ -491,11 +496,11 @@ CacheDownload.FileUtil={
 	    	fileURL:null,
 	    	isDocument: true
 	    };
-	    	
-		getTargetFile(fpParams, true);
+		
+		getTargetFile(fpParams, CacheDownload.FileUtil.callbackSave, true);
 		file = fpParams.file;
 		fileURL = makeFileURI(fpParams.file);
-		  
+		
 		//Make persist info
 		var persistArgs = {
 		    source      : source,
@@ -573,6 +578,18 @@ CacheDownload.ListViewUtils = {
 		this.init = function() {
 			this.objects = new Array();
 		};
+		
+		this.clear = function() {
+			alert("soo");
+			while (this.objects.length > 0) {
+			    this.objects.pop();
+			}
+			alert("oo");
+			if (this.fCallback != null) {
+				this.fCallback.updateContents();
+			}
+		};
+		
 		this.add = function (object) {
 			this.objects.push(object);
 			if (this.fCallback != null) {
@@ -581,6 +598,28 @@ CacheDownload.ListViewUtils = {
 		};
 	}
 };
+
+
+
+CacheDownload.CacheManager = {
+
+	onClearCache: function() {
+		var cacheService = Components.classes["@mozilla.org/network/cache-service;1"].getService(Components.interfaces.nsICacheService);
+		try {
+			cacheService.evictEntries(Components.interfaces.nsICache.STORE_ON_DISK);
+        }
+        catch(e) {
+        }
+        try {
+		    cacheService.evictEntries(Components.interfaces.nsICache.STORE_IN_MEMORY);
+        }
+        catch(e) {
+        }
+	}
+};
+
+
+
 
 CacheDownload.AnalyseParser = {
 	
@@ -1099,5 +1138,119 @@ CacheDownload.AnalyseParser = {
 		return initLexeme;
 	}
 	
+	
 };
+
+
+
+
+
+
+CacheDownload.CacheBrowser={
+		result : null,
+		listener : null,
+		match: null,
+		
+		onLoad: function() {
+		},
+		
+		
+		onDialogCancel: function() {
+		}, 
+		
+		onDialogAccept: function() {
+			this.result["status"]=true;
+		},
+		
+		getLocale: function() {
+			return document.getElementById("cachedownload.options.strings");
+		},
+		
+		onBrowseCache: function(event) {
+			let result = {};
+			CacheDownload.CacheBrowser.match = new RegExp(".*", "g");
+			CacheDownload.CacheBrowser.listener = new CacheDownload.ListViewUtils.ContentListener();
+			CacheDownload.CacheBrowser.listener.init();
+			
+			CacheDownload.CacheVisitor.triggerVisit(CacheDownload.CacheBrowser);
+			openDialog("chrome://cachedownload/content/cache-browse-view.xul", null, 'chrome,titlebar,centerscreen,modal', CacheDownload.CacheBrowser.listener, result);
+		}, 
+		
+		beforeVisitEntries: function() {
+		},
+		
+		afterVisitEntries: function() {
+		},
+		
+		visitEntry: function (aEntryValue) {
+				try {
+			var icon = "unknown";
+			var value = aEntryValue;
+			
+			if (CacheDownload.CacheBrowser.match && CacheDownload.CacheBrowser.match.exec(aEntryValue.key)) {
+
+				//filename from key
+				var ext = value.filename.split("\.")
+				if (ext.length>1) {
+					icon = ext[1];
+				}
+				icon = "moz-icon://."+icon+"?size=16";
+				
+				try {
+					var cacheService = Components.classes["@mozilla.org/network/cache-service;1"].getService(Components.interfaces.nsICacheService);
+					var session = cacheService.createSession(aEntryValue.clientID, Components.interfaces.nsICache.STORE_ANYWHERE, aEntryValue.isStreamBased);
+					session.doomEntriesIfExpired = false;
+					
+					function cacheListener(entryValue_p, icon_p) {
+						this.entryValue = entryValue_p;
+						this.aIcon = icon_p;
+					}
+					cacheListener.prototype = {
+						entryValue : null,
+						aIcon : "",
+						onCacheEntryAvailable : function(descriptor, accessGranted, status) {
+							try {
+								var head = descriptor.getMetaDataElement("response-head");
+								var cType = null;
+								var contentTypeHeader = "Content-Type: ";
+								var a = head.indexOf(contentTypeHeader);
+								if (a > 0) {
+									var b = head.indexOf("\n", a+contentTypeHeader.length);
+									cType = head.substring(a+contentTypeHeader.length, b-1);
+									b = cType.indexOf(";");
+									if (b > 0) {
+										cType = cType.substring(0, b);
+									}
+									this.aIcon = this.aIcon + "&contentType="+cType;
+									this.entryValue.contentType = cType;
+								}
+							} catch(e) {
+							}
+							
+							//Add item
+							this.entryValue.img_filename = this.aIcon;
+							CacheDownload.CacheBrowser.listener.add(this.entryValue);
+						}
+					};
+					
+					var descriptor = session.asyncOpenCacheEntry(aEntryValue.key, Components.interfaces.nsICache.ACCESS_READ, new cacheListener(value, icon));
+					
+				} catch(e) {
+				}
+			
+			}
+			
+			} catch(aae) {
+			}
+				
+		},
+
+		onClearCache: function() {
+			CacheDownload.CacheManager.onClearCache();
+		}
+		
+};
+
+
+
 

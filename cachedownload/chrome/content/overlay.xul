@@ -5,8 +5,8 @@
 
 <overlay id="cachedownload_overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-	<script type="application/x-javascript" src="overlay.js"/>
-	<script type="application/x-javascript" src="lib.js"/>
+	<script type="application/x-javascript" src="chrome://cachedownload/content/overlay.js"/>
+	<script type="application/x-javascript" src="chrome://cachedownload/content/lib.js"/>
 
 	<window id="main-window">
 		<stringbundleset id="cachedownload.stringbundleset">
@@ -14,16 +14,23 @@
 		</stringbundleset>
     </window>
 	
+	
+  
 	<toolbarpalette id="BrowserToolbarPalette">
 	
-
+	
+		
 	   <toolbarbutton id="cachedownload-button-switchmode" 
 	      class="toolbarbutton-1"
-	      type="checkbox"
+	      type="menu-button"
+	      disabled="yes"
 	      label="&cachedownload.switchmode;"
-	      tooltip="cachedownload-tooltip"
-	      oncommand="CacheDownload.switchmode(event);">
+          oncommand="CacheDownload.switchmode(event);"
+	      tooltip="cachedownload-tooltip">
 		  
+		  <menupopup id="cachedownload-context-popup" >
+           
+    
 		<tooltip id="cachedownload-tooltip" onpopupshowing="CacheDownload.computeInformations(event);">
 		  <label class="header" value="CacheDownload"/>
 		  <label value=""/>
@@ -33,8 +40,41 @@
 		  <label value=""/>
 		</tooltip>
 		
+           <menuitem id="cachedownload-activate-ctx-menuitem"
+            label="&cachedownload.activate;"
+        type="checkbox"
+            oncommand="CacheDownload.switchmode(event);"
+            tooltiptext="&cachedownload.activate.tooltip;"
+            class="menuitem-iconic cachedownload-options"
+            />
+            
+            <menuseparator />
+            
+           <menuitem id="cachedownload-options-ctx-menuitem"
+            label="&cachedownload.configure;"
+            oncommand="CacheDownload.onConfigure(event);"
+            tooltiptext="&cachedownload.configure.tooltip;"
+            class="menuitem-iconic cachedownload-options"
+            />
+            
+            <!--menuseparator />
+      
+            <menuitem id="cachedownload-cacheviewer-ctx-menuitem"
+              label="&cachedownload.cacheviewer;"
+              tooltiptext="&cachedownload.cacheviewer.tooltip;"
+              oncommand="CacheDownload.CacheBrowser.onBrowseCache();"
+              class="menuitem-iconic cachedownload-about"
+            /-->
+            
+       	   </menupopup>
+      
+      
+		
 		</toolbarbutton>
 	
 	</toolbarpalette>
+	
+  
+  
 
 </overlay>

@@ -110,11 +110,28 @@
 	},
 	
 	switchmode: function(event) {  
+
+	//	var 
+		//if (object!=null) {
+	//		CacheDownload.enabled=object.hasAttribute("checked");
+	//	}
 		
-		var object = document.getElementById("cachedownload-button-switchmode");
-		if (object!=null) {
+		//var 
+		var object = document.getElementById("cachedownload-activate-ctx-menuitem");
+		if (object != null) {
 			CacheDownload.enabled=object.hasAttribute("checked");
+			var objectTb = document.getElementById("cachedownload-button-switchmode");
+			if (objectTb != null) {
+				if (CacheDownload.enabled) {
+					objectTb.removeAttribute("disabled");
+					
+				} else {
+					objectTb.setAttribute("disabled", "yes");
+				}
+			}
 		}
+		//
+		
 		var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
 		
 		if (CacheDownload.enabled) {
@@ -130,6 +147,13 @@
 			}
 		}
 		
+	},
+	
+	
+	onConfigure: function(ev) {
+
+		openDialog('chrome://cachedownload/content/options.xul', null, 'chrome,titlebar,toolbar,centerscreen,modal');
+		  
 	},
 	
 	triggerCheck : function() {
@@ -291,6 +315,7 @@
 		this.observe("", "");
 	}, 
 	
+	
 	observe: function(branch, name) {
 		CacheDownload.rules = new Array();
 		//Load rules
@@ -329,8 +354,18 @@
 			CacheDownload.rules.push(rule);
 		}
 	}
+	
+	  
 
 };
+
+
+
+
+
+
+
+
 
 
 // Basic namespace implementation.

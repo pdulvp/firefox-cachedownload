@@ -25,6 +25,10 @@ CacheDownload.ListView={
 		dialog.acceptDialog();
 	}, 
 	
+	updateContents: function() {
+		alert("okok");
+	},
+	
 	updateContent: function(object) {
 		this.treeBox.rowCountChanged(this.objects.length-1, 1);
 	},
@@ -80,6 +84,9 @@ CacheDownload.ListView={
   // --------------------------------------------
 	
 
+  onDetectSelectionRule: function() {
+	
+	}, 
 	onDialogCancel: function() {
 	
 	}, 

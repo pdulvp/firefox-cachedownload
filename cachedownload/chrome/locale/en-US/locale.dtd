@@ -2,6 +2,18 @@
 <!ENTITY cachedownload.switchmode "CacheDownload">
 <!ENTITY cachedownload.options.title "Options">
 
+<!ENTITY cachedownload.activate "Start CacheDownload">
+<!ENTITY cachedownload.activate.tooltip "Enable CacheDownload">
+
+<!ENTITY cachedownload.configure "Configurer les règles">
+<!ENTITY cachedownload.configure.tooltip "Configurer les règles de téléchargement">
+
+<!ENTITY cachedownload.cacheviewer "Parcourir le cache">
+<!ENTITY cachedownload.cacheviewer.tooltip "Parcourir le cache et sauvegarder manuellement des éléments">
+
+<!ENTITY cachedownload.about "A propos de CacheDownload">
+<!ENTITY cachedownload.about.tooltip "A propos">
+
 <!ENTITY cachedownload.options.pane.rules "Rules">
 <!ENTITY cachedownload.options.pane.general "General">
 

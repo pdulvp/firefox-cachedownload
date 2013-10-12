@@ -3,7 +3,7 @@
   <Description about="urn:mozilla:install-manifest">
     <em:id>cachedownload@pdulvp</em:id>
     <em:name>CacheDownload</em:name>
-    <em:version>0.7.201308031145</em:version>
+    <em:version>0.7.201310121020</em:version>
 	<em:description>Download some elements of cache automatically</em:description>
     <em:creator>pdulvp</em:creator>
     <em:iconURL>chrome://cachedownload/skin/icon32.png</em:iconURL>
@@ -14,7 +14,7 @@
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
         <em:minVersion>18.0</em:minVersion>
-        <em:maxVersion>22.*</em:maxVersion>
+        <em:maxVersion>24.*</em:maxVersion>
       </Description>
     </em:targetApplication>
   </Description>      
