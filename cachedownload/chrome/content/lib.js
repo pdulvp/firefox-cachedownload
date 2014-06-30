@@ -1,4 +1,5 @@
-﻿CacheDownload.SharedObjects = {
+﻿
+CacheDownload.SharedObjects = {
 	
 	TYPE_UNKNOWN: 0000,
 	TYPE_STRING: 0001,
@@ -197,7 +198,10 @@
 		this.evaluatedFilename = function(aEntryValue) {
 			return CacheDownload.FileUtil.evaluateExpressionAsFilename(this.rule.fileNameExpression, this.rule, this.entryValue);
 		};
-		;
+		
+		this.evaluatedLocation = function(aEntryValue) {
+			return ""; //TODO !
+		};
 		
 		this.match = function(aEntryValue) {
 			return this.key == aEntryValue.key;
@@ -456,19 +460,11 @@ CacheDownload.FileUtil={
 		
 	}, 
 	
-	myInternalSave : function(aURL, aBaseName, consecutive)
+	myInternalSave : function(aURL, aBaseName, aLocation, consecutive)
 	{
 		var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
 		
-		var saveModeParam = 0x00; //SAVEMODE_FILEONLY ;//GetSaveModeForContentType(null);
-		var saveAsType = kSaveAsType_Complete;
-		var file, fileURL, fileCacheKey;
-		 
-		//Make uri for source
-		var source_fileInfo = new FileInfo("default");
-		initFileInfo(source_fileInfo, aURL, null, null, null, null);
-	    
-		var source = source_fileInfo.uri;
+		
 		
 		//Retrieve current extension from the given expressionValue
 		var aExt = "";
@@ -482,68 +478,98 @@ CacheDownload.FileUtil={
 			aBaseName = aBaseName.substr(0, aBaseName.length-1-aExt.length);
 		}
 		
+		
+		//function internalSave(aURL, aDocument, aDefaultFileName, aContentDisposition,
+    //                  aContentType, aShouldBypassCache, aFilePickerTitleKey,
+    //                  aChosenData, aReferrer, aInitiatingDocument, aSkipPrompt,
+    //                  aCacheKey)
+
+    var aDocument = null;
+    var aDefaultFileName = "default";
+    
+    var aSkipPrompt = true;
+    var aShouldBypassCache = false;  //IMPORTANT
+    var aCacheKey = null;
+
+    // Note: aDocument == null when this code is used by save-link-as... 0x00; //SAVEMODE_FILEONLY ;//GetSaveModeForContentType(null);
+    var saveMode = 0x00; //SAVEMODE_FILEONLY ; GetSaveModeForContentType(aContentType, aDocument);
+
+    var file, sourceURI, saveAsType;
+    // Find the URI object for aURL and the FileName/Extension to use when saving.
+    // FileName/Extension will be ignored if aChosenData supplied.
+    
+		//Make uri for source
+		var source_fileInfo = new FileInfo(aDefaultFileName);
+		initFileInfo(source_fileInfo, aURL, null, null, null, null);
+		var sourceURI = source_fileInfo.uri;
+		
 		//Make uri and file for target
-		var target_fileInfo = new FileInfo("default");
+		var target_fileInfo = new FileInfo(aDefaultFileName);
 		initFileInfo(target_fileInfo, aURL, null, null, null, null);
 	    target_fileInfo.fileExt = aExt;
 		target_fileInfo.fileBaseName = aBaseName;
 		target_fileInfo.fileName=target_fileInfo.fileBaseName;
+		
 		 
 		var fpParams = {
 	    	fileInfo: target_fileInfo,
 	    	file:null,
-	    	saveMode: saveModeParam,
+	    	saveMode: saveMode,
 	    	fileURL:null,
 	    	isDocument: true
 	    };
 		
-		getTargetFile(fpParams, CacheDownload.FileUtil.callbackSave, true);
-		file = fpParams.file;
-		fileURL = makeFileURI(fpParams.file);
-		
-		//Make persist info
-		var persistArgs = {
-		    source      : source,
-		    contentType : null,
-		    target      : fileURL,
-		    postData    : null,
-			fileCacheKey : makeURI(aURL),
-		    bypassCache : false
-		};
-		  
-		var persist = makeWebBrowserPersist();
-		
-		// Calculate persist flags.
-		const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
-		const flags = nsIWBP.PERSIST_FLAGS_REPLACE_EXISTING_FILES;
-		persist.persistFlags = flags | nsIWBP.PERSIST_FLAGS_FROM_CACHE;
-		  
-		// Leave it to WebBrowserPersist to discover the encoding type:
-		persist.persistFlags |= nsIWBP.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION;
-		
-		// Create download and initiate it (below)
-		var timer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
-		
-		function timerDownloadback() {}
-		timerDownloadback.prototype = {
-			_finalize: function() {
-			},
-			observe: function(aTimer, aTopic, aData) {
-				var transfer = Components.classes["@mozilla.org/transfer;1"].createInstance(Components.interfaces.nsITransfer);
-				aConsoleService.logStringMessage("[cachedownload] save file: "+target_fileInfo.fileName+"."+target_fileInfo.fileExt);
-				transfer.init(persistArgs.source, persistArgs.target, "", null, null, null, persist, true);
-				persist.progressListener = new DownloadListener(window, transfer);
-				
-				var privacyContext = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-                .getInterface(Components.interfaces.nsIWebNavigation)
-                .QueryInterface(Components.interfaces.nsILoadContext);
 
-				persist.saveURI(persistArgs.source, persistArgs.fileCacheKey, null, 
-						persistArgs.postData, null, persistArgs.target, privacyContext);
-			}
-		};
+    // Find a URI to use for determining last-downloaded-to directory
+    var relatedURI = null;
+    var aReferrer = null;
+    
+    promiseTargetFile(fpParams, aSkipPrompt, relatedURI).then(aDialogAccepted => {
+      if (!aDialogAccepted)
+        return;
+
+      saveAsType = fpParams.saveAsType;
+      file = fpParams.file;
+
+        // trigger continueSave after a specific delay
+        var timer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
+        
+        function timerDownloadback() {}
+        timerDownloadback.prototype = {
+          _finalize: function() {
+          },
+          observe: function(aTimer, aTopic, aData) {
+            continueSave();
+          }
+        };
+        
+        timer.init(new timerDownloadback(), consecutive, timer.TYPE_ONE_SHOT);
+        
+    }).then(null, Components.utils.reportError);
+  
+
+    function continueSave() {
+      // If we're saving a document, and are saving either in complete mode or
+      // as converted text, pass the document to the web browser persist component.
+      // If we're just saving the HTML (second option in the list), send only the URI.
+      
+      var persistArgs = {
+        sourceURI         : sourceURI,
+        sourceReferrer    : aReferrer,
+        sourceDocument    : null,
+        targetContentType : null,
+        targetFile        : file,
+        sourceCacheKey    : aCacheKey,
+        sourcePostData    : null,
+        bypassCache       : aShouldBypassCache,
+        initiatingWindow  : window
+      };
+
+      // Start the actual save process
+      internalPersist(persistArgs);
+    }
+    
 		
-		timer.init(new timerDownloadback(), consecutive, timer.TYPE_ONE_SHOT);
 	}
 };
 

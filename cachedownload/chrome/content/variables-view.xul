@@ -17,8 +17,8 @@
 	height="340px"
 	>
 
-	<script type="application/x-javascript" src="chrome://cachedownload/content/list-view.js"/>
-    <script type="application/x-javascript" src="chrome://cachedownload/content/lib.js"/>
+	<script type="application/javascript;version=1.7" src="chrome://cachedownload/content/list-view.js"/>
+    <script type="application/javascript;version=1.7" src="chrome://cachedownload/content/lib.js"/>
 
     <hbox flex="1">
 	<vbox flex="1">

@@ -259,7 +259,7 @@
 	
 	afterVisitEntries: function () {
 		var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
-					
+							
 		if (this.files==null) return;
 		for (var i=0; i<this.files.length; i++) {
 			//aConsoleService.logStringMessage("Cache that : "+this.files[i].key);
@@ -292,7 +292,9 @@
 		this.lastDownloadedFile = this.files[index];
 		this.computeInformations(null);
 		
-		CacheDownload.FileUtil.myInternalSave(key, filename, CacheDownload.TIMER_DOWNLOAD_CONSECUTIVE);
+		var location = this.files[index].evaluatedLocation();
+		
+		CacheDownload.FileUtil.myInternalSave(key, filename, location, CacheDownload.TIMER_DOWNLOAD_CONSECUTIVE);
 		
 		//aConsoleService.logStringMessage("Saved to : "+filename);
 		//internalSave(key, null, null, null, null, false, null, auto, null, true);

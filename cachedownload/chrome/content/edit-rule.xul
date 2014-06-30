@@ -16,8 +16,8 @@
 	height="400px"
 	>
 
-	<script type="application/x-javascript" src="chrome://cachedownload/content/edit-rule.js"/>
-    <script type="application/x-javascript" src="chrome://cachedownload/content/lib.js"/>
+	<script type="application/javascript;version=1.7" src="chrome://cachedownload/content/edit-rule.js"/>
+    <script type="application/javascript;version=1.7" src="chrome://cachedownload/content/lib.js"/>
 
 	<stringbundleset id="cachedownload.options.stringbundleset">
 		<stringbundle id="cachedownload.options.strings" src="chrome://cachedownload/locale/locale.properties"/>

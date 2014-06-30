@@ -13,8 +13,8 @@
 	width="600px"
 	height="370px">
 
-    <script type="application/x-javascript" src="chrome://cachedownload/content/options.js"/>
-    <script type="application/x-javascript" src="chrome://cachedownload/content/lib.js"/>
+    <script type="application/javascript;version=1.7" src="chrome://cachedownload/content/options.js"/>
+    <script type="application/javascript;version=1.7" src="chrome://cachedownload/content/lib.js"/>
 	
 	<prefpane id="paneGeneral" selected="true" label="&cachedownload.options.pane.general;" src="chrome://cachedownload/content/prefs-general.xul" flex="1"/>
     <prefpane id="paneRules" label="&cachedownload.options.pane.rules;" src="chrome://cachedownload/content/prefs-rules.xul" flex="1"/>

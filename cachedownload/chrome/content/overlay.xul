@@ -5,8 +5,8 @@
 
 <overlay id="cachedownload_overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-	<script type="application/x-javascript" src="chrome://cachedownload/content/overlay.js"/>
-	<script type="application/x-javascript" src="chrome://cachedownload/content/lib.js"/>
+	<script type="application/javascript;version=1.7" src="chrome://cachedownload/content/overlay.js"/>
+	<script type="application/javascript;version=1.7" src="chrome://cachedownload/content/lib.js"/>
 
 	<window id="main-window">
 		<stringbundleset id="cachedownload.stringbundleset">
