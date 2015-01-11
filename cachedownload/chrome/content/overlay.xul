@@ -57,14 +57,21 @@
             class="menuitem-iconic cachedownload-options"
             />
             
-            <!--menuseparator />
+            <menuseparator />
       
-            <menuitem id="cachedownload-cacheviewer-ctx-menuitem"
+            <!--menuitem id="cachedownload-cacheviewer-ctx-menuitem"
               label="&cachedownload.cacheviewer;"
               tooltiptext="&cachedownload.cacheviewer.tooltip;"
               oncommand="CacheDownload.CacheBrowser.onBrowseCache();"
               class="menuitem-iconic cachedownload-about"
             /-->
+            
+            <menuitem id="cachedownload-cacheviewer-ctx-menuitem"
+              label="&cachedownload.clearcache;"
+              tooltiptext="&cachedownload.clearcache.tooltip;"
+              oncommand="CacheDownload.CacheManager.onClearCache();"
+              class="menuitem-iconic cachedownload-about"
+            />
             
        	   </menupopup>
       

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0"?>
+<?xml version="1.0"?>
 <!DOCTYPE dialog SYSTEM "chrome://cachedownload/locale/locale.dtd">
 
 <?xml-stylesheet href="chrome://cachedownload/skin/style.css" type="text/css"?>
@@ -10,22 +10,22 @@
 	title="&cachedownload.options.cacheview.title;"
 	edittitle="edittitle"
 	id="cachedownload-listView"
-	onload="CacheDownload.ListView.onLoad()"
-	ondialogcancel="CacheDownload.ListView.onDialogCancel()"
-	ondialogaccept="CacheDownload.ListView.onDialogAccept()"
-	width="740px"
+	onload="CacheDownload.CacheView.onLoad()"
+	ondialogcancel="CacheDownload.CacheView.onDialogCancel()"
+	ondialogaccept="CacheDownload.CacheView.onDialogAccept()"
+	width="940px"
 	height="340px"
 	>
 
-	<script type="application/javascript;version=1.7" src="chrome://cachedownload/content/list-view.js"/>
+	<script type="application/javascript;version=1.7" src="chrome://cachedownload/content/cache-view.js"/>
     <script type="application/javascript;version=1.7" src="chrome://cachedownload/content/lib.js"/>
 
     <hbox flex="1">
 	<vbox flex="1">
         <tree treelines="true" id="cachedownload-listView-tree" seltype="single" flex="1" 
-			onclick="CacheDownload.ListView.onDetectSelectionRule(event);" 
-			onselect="CacheDownload.ListView.onSelectRule();" 
-			ondblclick="CacheDownload.ListView.onDoubleClickRule();">
+			onclick="CacheDownload.CacheView.onDetectSelectionRule(event);" 
+			onselect="CacheDownload.CacheView.onSelectRule();" 
+			ondblclick="CacheDownload.CacheView.onDoubleClickRule();">
             <treecols>
               <treecol id="filename" width="130" label="&cachedownload.options.cacheview.filename.label;"/>
 			  <splitter class="tree-splitter"/> 
@@ -38,7 +38,15 @@
             </treecols>
             <treechildren flex="1" onoverflow="displayScrollbarSpacer(true)" onunderflow="displayScrollbarSpacer(false)"/>
         </tree>
+        
     </vbox>
+        
+    <hbox id="right-side" width="200" height="160">
+        <vbox>
+            <image id="imgPreview"/>
+        </vbox>
+    </hbox>
+        
     </hbox>
 	
 

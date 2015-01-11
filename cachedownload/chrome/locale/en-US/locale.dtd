@@ -8,6 +8,9 @@
 <!ENTITY cachedownload.configure "Configurer les règles">
 <!ENTITY cachedownload.configure.tooltip "Configurer les règles de téléchargement">
 
+<!ENTITY cachedownload.clearcache "Clear cache">
+<!ENTITY cachedownload.clearcache.tooltip "Clear cache">
+
 <!ENTITY cachedownload.cacheviewer "Parcourir le cache">
 <!ENTITY cachedownload.cacheviewer.tooltip "Parcourir le cache et sauvegarder manuellement des éléments">
 
@@ -32,6 +35,11 @@
 <!ENTITY cachedownload.options.editrule.filenameExpression.label "Filename expresssion">
 <!ENTITY cachedownload.options.editrule.global.label "Global">
 <!ENTITY cachedownload.options.editrule.ruleExpression.label "Regular expression to match files">
+<!ENTITY cachedownload.options.editrule.folderExpression.label "Folder destination">
+
+<!ENTITY cachedownload.options.selectFolder "Select Folder">
+<!ENTITY cachedownload.options.selectFolderExpression "Leave empty to use the default download folder">
+
 
 <!ENTITY cachedownload.options.general.label "Main">
 <!ENTITY cachedownload.options.general.timeCheckCache "Time between two cache checks (ms)">

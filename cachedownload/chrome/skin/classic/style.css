@@ -26,6 +26,8 @@ window:not([active="true"]) #cachedownload-button-switchmode  {
 radio[pane=paneGeneral] {		-moz-image-region: rect(0 32px 32px 0)}
 radio[pane=paneRules] {		-moz-image-region: rect(0 64px 32px 32px)}
 
+
+
 #btnVariablesHelp {
   list-style-image: url("chrome://cachedownload/skin/variables.png");
 }
@@ -45,10 +47,15 @@ radio[pane=paneRules] {		-moz-image-region: rect(0 64px 32px 32px)}
   max-width:42px;
 }
 
-
-
 #btnCheckExpression {
   list-style-image: url("chrome://cachedownload/skin/browse.png");
+  width:32px;
+  min-width:32px;
+  max-width:32px;
+}
+
+#btnSelectFolder {
+  list-style-image: url("chrome://cachedownload/skin/folder.png");
   width:32px;
   min-width:32px;
   max-width:32px;
@@ -60,6 +67,13 @@ radio[pane=paneRules] {		-moz-image-region: rect(0 64px 32px 32px)}
   min-width:32px;
   max-width:32px;
 }
+
+
+
+
+
+
+
 
 #cachedownload-warning {
     list-style-image: url("chrome://cachedownload/skin/warning.png");

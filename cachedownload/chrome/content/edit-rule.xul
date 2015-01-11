@@ -1,4 +1,4 @@
-﻿<?xml version="1.0"?>
+<?xml version="1.0"?>
 <?xml-stylesheet href="chrome://global/skin/global.css"?>
 <?xml-stylesheet href="chrome://cachedownload/skin/style.css" type="text/css"?>
 
@@ -24,6 +24,7 @@
 	</stringbundleset>
 
 <command id="checkRuleExpression" oncommand="CacheDownload.EditRule.onCheckRuleExpression();"/>
+<command id="selectFolder" oncommand="CacheDownload.EditRule.onSelectFolder();"/>
 <command id="checkFileNameExpression" oncommand="CacheDownload.EditRule.onCheckFileNameExpression();"/>
 <command id="showVariables" oncommand="CacheDownload.EditRule.onShowVariables();"/>
 <command id="showFunctions" oncommand="CacheDownload.EditRule.onShowFunctions();"/>
@@ -89,6 +90,14 @@
 			<textbox flex="1" id="tbRuleExpression" multiline="false" tooltiptext="&cachedownload.options.helpRuleExpression;"/>
 			<button id="btnCheckExpression" command="checkRuleExpression" tooltiptext="&cachedownload.options.checkCache;"/>
 		</hbox>
+	</groupbox>
+	
+	<groupbox>
+		<caption label="&cachedownload.options.editrule.folderExpression.label;"/>
+		<hbox flex="1">
+			<textbox flex="1" id="tbFolderExpression" multiline="false" tooltiptext="&cachedownload.options.selectFolderExpression;" />
+			<button id="btnSelectFolder" command="selectFolder" tooltiptext="&cachedownload.options.selectFolder;"/>
+        </hbox>
 	</groupbox>
 	
 	

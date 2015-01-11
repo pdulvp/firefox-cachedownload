@@ -6,3 +6,6 @@ overlay	chrome://browser/content/browser.xul	chrome://cachedownload/content/over
 
 locale	cachedownload	en-US	chrome/locale/en-US/
 locale	cachedownload	fr-FR	chrome/locale/fr-FR/
+
+component AF48EB19-724C-4A38-9B98-0353FF4AC57D components/aboutcachedownload.js
+contract @mozilla.org/network/protocol/about;1?what=cachedownload AF48EB19-724C-4A38-9B98-0353FF4AC57D

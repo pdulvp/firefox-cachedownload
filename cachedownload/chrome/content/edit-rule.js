@@ -23,9 +23,11 @@ CacheDownload.EditRule={
 			this.tbFileNameExpression = document.getElementById("tbFileNameExpression");
 			this.tbId = document.getElementById("tbId");
 			this.tbDescription = document.getElementById("tbDescription");
+			this.tbLocationExpression = document.getElementById("tbFolderExpression");
 			
 			this.tbFileNameExpression.value = this.rule["fileNameExpression"];
 			this.tbRuleExpression.value = this.rule["ruleExpression"];
+			this.tbLocationExpression.value = this.rule["locationExpression"];
 			this.tbId.value = this.rule["id"];
 			this.tbDescription.value = this.rule["description"];
 		}
@@ -37,6 +39,7 @@ CacheDownload.EditRule={
 	onDialogAccept: function() {
 		this.rule["fileNameExpression"]=this.tbFileNameExpression.value;
 		this.rule["ruleExpression"]=this.tbRuleExpression.value;
+		this.rule["locationExpression"]=this.tbLocationExpression.value;
 		this.rule["id"]=this.tbId.value;
 		this.rule["description"]=this.tbDescription.value;
 		this.result["status"]=true;
@@ -154,9 +157,21 @@ CacheDownload.EditRule={
 		CacheDownload.EditRule.match = new RegExp(CacheDownload.EditRule.tbRuleExpression.value, "g");
 		CacheDownload.EditRule.listener = new CacheDownload.ListViewUtils.ContentListener();
 		CacheDownload.EditRule.listener.init();
-		
+
 		CacheDownload.CacheVisitor.triggerVisit(CacheDownload.EditRule);
 		openDialog("cache-view.xul", "_blank", "chrome,centerscreen,modal,resizable,dialog=no", CacheDownload.EditRule.listener, result);
+	}, 
+	
+	onSelectFolder: function() {
+
+		var fp = Components.classes["@mozilla.org/filepicker;1"].createInstance(Components.interfaces.nsIFilePicker);
+		fp.init(window, null, Components.interfaces.nsIFilePicker.modeGetFolder);
+		
+		var res = fp.show();
+		if (res == Components.interfaces.nsIFilePicker.returnCancel)
+			return;
+		
+		this.tbLocationExpression.value = fp.file.path;
 	}, 
 	
 	beforeVisitEntries: function() {
@@ -167,10 +182,11 @@ CacheDownload.EditRule={
 	
 	visitEntry: function (aEntryValue) {
 			try {
+				
 		var icon = "unknown";
 		var value = aEntryValue;
 		value.evaluatedFilename = CacheDownload.EditRule.evaluate(value);
-		
+
 		if (CacheDownload.EditRule.match && CacheDownload.EditRule.match.exec(aEntryValue.key)) {
 			//filename from key
 			var ext = value.filename.split("\.")
@@ -178,20 +194,25 @@ CacheDownload.EditRule={
 				icon = ext[1];
 			}
 			icon = "moz-icon://."+icon+"?size=16";
-			
+
 			try {
-				var cacheService = Components.classes["@mozilla.org/network/cache-service;1"].getService(Components.interfaces.nsICacheService);
-				var session = cacheService.createSession(aEntryValue.clientID, Components.interfaces.nsICache.STORE_ANYWHERE, aEntryValue.isStreamBased);
-				session.doomEntriesIfExpired = false;
 				
+				var cacheService = Components.classes["@mozilla.org/netwerk/cache-storage-service;1"].getService(Components.interfaces.nsICacheStorageService);
+					
 				function cacheListener(entryValue_p, icon_p) {
 					this.entryValue = entryValue_p;
 					this.aIcon = icon_p;
 				}
+				
 				cacheListener.prototype = {
 					entryValue : null,
 					aIcon : "",
-					onCacheEntryAvailable : function(descriptor, accessGranted, status) {
+					
+					onCacheEntryCheck: function (entry, appcache) {
+						return Components.interfaces.nsICacheEntryOpenCallback.ENTRY_WANTED;
+					},
+					onCacheEntryAvailable: function(descriptor, isnew, applicationCache, status) {
+						
 						try {
 							var head = descriptor.getMetaDataElement("response-head");
 							var cType = null;
@@ -213,11 +234,25 @@ CacheDownload.EditRule={
 						//Add item
 						this.entryValue.img_filename = this.aIcon;
 						CacheDownload.EditRule.listener.add(this.entryValue);
+						
 					}
+					
 				};
 				
-				var descriptor = session.asyncOpenCacheEntry(aEntryValue.key, Components.interfaces.nsICache.ACCESS_READ, new cacheListener(value, icon));
-				
+				if (aEntryValue.isMemory) {
+					cacheService.memoryCacheStorage(LoadContextInfo.default,false).asyncOpenURI(
+							aEntryValue.uri,
+							"",
+							Components.interfaces.nsICacheStorage.OPEN_READONLY,
+							new cacheListener(value, icon));
+				} else {
+					cacheService.diskCacheStorage(LoadContextInfo.default,false).asyncOpenURI(
+							aEntryValue.uri,
+							"",
+							Components.interfaces.nsICacheStorage.OPEN_READONLY,
+							new cacheListener(value, icon));
+				}
+
 			} catch(e) {
 			}
 		

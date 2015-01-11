@@ -1,4 +1,5 @@
-﻿
+﻿Components.utils.import("resource://gre/modules/LoadContextInfo.jsm");
+
 CacheDownload.SharedObjects = {
 	
 	TYPE_UNKNOWN: 0000,
@@ -91,6 +92,7 @@ CacheDownload.SharedObjects = {
 		this.id = "";
 		this.description = "";
 		this.isEnabled = true;
+		this.locationExpression = "";
 		this.fileNameExpression = "";
 		this.ruleExpression = "";
 		this.version = "";
@@ -147,23 +149,23 @@ CacheDownload.SharedObjects = {
 		};
 	}, 
 	
-	EntryValue: function(aEntryInfo) {
-		this.key = aEntryInfo.key;
-		this.cacheEntry = aEntryInfo;
-		this.value = aEntryInfo.key;
-		this.filename = CacheDownload.FileUtil.getFileNameFromURL(aEntryInfo.key);
+	EntryValue: function(aURI,aIdEnhance,aDataSize,aFetchCount,aLastModifiedTime,aExpirationTime,aIsMemory) {
+		this.key = aURI.prePath+aURI.path;
+		this.uri = aURI;
+		this.isMemory = aIsMemory;
+		this.cacheEntry = null;
+		this.value = aURI.prePath+aURI.path;
+		this.filename = CacheDownload.FileUtil.getFileNameFromURL(aURI.prePath+aURI.path);
+		this.dataSize=aDataSize;
+		this.lastModifiedDate = aLastModifiedTime;
+		this.lastModified=aLastModifiedTime;
+		this.expirationTime=aExpirationTime;
+		this.fetchCount=aFetchCount;
 		
-		this.dataSize=aEntryInfo.dataSize;
-		
-		this.lastModifiedDate = aEntryInfo.lastModified;
-		this.lastModified=aEntryInfo.lastModified;
-		
-		this.clientID =aEntryInfo.clientID;
-		this.deviceID=aEntryInfo.deviceID;
-		this.expirationTime=aEntryInfo.expirationTime;
-		this.fetchCount=aEntryInfo.fetchCount;
-		this.lastFetched =aEntryInfo.lastFetched;
-		this.isStreamBased=aEntryInfo.isStreamBased();
+		//this.clientID=aEntryInfo.clientID;
+		//this.deviceID=aEntryInfo.deviceID;
+		//this.lastFetched=aEntryInfo.lastFetched;
+		//this.isStreamBased=aEntryInfo.isStreamBased();
 		
 		this.contentType = "";
 		
@@ -200,7 +202,7 @@ CacheDownload.SharedObjects = {
 		};
 		
 		this.evaluatedLocation = function(aEntryValue) {
-			return ""; //TODO !
+			return this.rule.locationExpression; //TODO !
 		};
 		
 		this.match = function(aEntryValue) {
@@ -211,7 +213,13 @@ CacheDownload.SharedObjects = {
 
 CacheDownload.CacheVisitor = {
 	cacheEntries : null,
+	aCallback : null,
 	timer: null,
+	mode: 0,
+	
+	MODE_MEMORY: 0000,
+	MODE_DISK: 0001,
+	MODE_DISPATCH: 0002,
 	
 	cancel : function() {
 		if (CacheDownload.CacheVisitor.timer != null) {
@@ -220,31 +228,15 @@ CacheDownload.CacheVisitor = {
 	},
 	
 	triggerVisit : function(callback) {
-		CacheDownload.CacheVisitor.timer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
 		
-		function timerVisitEntries() {
-		}
-		timerVisitEntries.prototype = {
-			observe: function(aTimer, aTopic, aData) {
-				if (CacheDownload.CacheVisitor.cacheEntries != null && CacheDownload.CacheVisitor.cacheEntries.length>0) {
-					var aEntryInfo2 = CacheDownload.CacheVisitor.cacheEntries.pop();	
-					callback.visitEntry(aEntryInfo2);
-					CacheDownload.CacheVisitor.timer.init(this, 0, CacheDownload.CacheVisitor.timer.TYPE_ONE_SHOT);
-				} else {
-					callback.afterVisitEntries();
-				}
-			}
-		};
+		CacheDownload.CacheVisitor.timer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
 		
 		function timerTriggerVisit() {
 		}
 		timerTriggerVisit.prototype = {
 			observe: function(aTimer, aTopic, aData) {
-				CacheDownload.CacheVisitor.initVisit();
-				callback.beforeVisitEntries();
-				var cacheService = Components.classes["@mozilla.org/network/cache-service;1"].getService(Components.interfaces.nsICacheService);
-				cacheService.visitEntries(CacheDownload.CacheVisitor);
-				CacheDownload.CacheVisitor.timer.init(new timerVisitEntries(), 0, CacheDownload.CacheVisitor.timer.TYPE_ONE_SHOT);
+				CacheDownload.CacheVisitor.initVisit(callback);
+				CacheDownload.CacheVisitor.onCacheEntryVisitCompleted();
 			}
 		};
 
@@ -252,20 +244,59 @@ CacheDownload.CacheVisitor = {
 	},
 	
 	// ***** nsICacheVisitor *****
-	initVisit: function () {
+	initVisit: function (callback) {
+		CacheDownload.CacheVisitor.aCallback = callback;
 		CacheDownload.CacheVisitor.cacheEntries = new Array();
+		CacheDownload.CacheVisitor.mode = CacheDownload.CacheVisitor.MODE_MEMORY;
 	},
 	
-	// ***** nsICacheVisitor *****
-	visitDevice: function (aDeviceID, aDeviceInfo) {
-		return true;
+	onCacheStorageInfo: function (aEntryCount, aConsumption, aCapacity, aDiskDirectory) {
+		//var aDeviceID = "memory";
+		//document.getElementById(aDeviceID).setAttribute("value", Math.round(aConsumption/1024000*100)/100+"/"+Math.round(aCapacity/1024000*100)/100);
+		//document.getElementById(aDeviceID + "Meter").setAttribute("value", Math.round(aConsumption/aCapacity*100));
+		//document.getElementById(aDeviceID + "Entries").setAttribute("value", aEntryCount +" "+ self._bundle.getString("entries"));
 	},
 	
-	visitEntry: function (aDeviceID, aEntryInfo) {
-		var customEntryInfo = new CacheDownload.SharedObjects.EntryValue(aEntryInfo);
+	onCacheEntryInfo: function (aURI,aIdEnhance,aDataSize,aFetchCount,aLastModifiedTime,aExpirationTime) {
+		var aIsMemory = false;
+		var customEntryInfo = new CacheDownload.SharedObjects.EntryValue(aURI, aIdEnhance, aDataSize, aFetchCount, aLastModifiedTime, aExpirationTime,aIsMemory);
 		CacheDownload.CacheVisitor.cacheEntries.push(customEntryInfo);
-		return true;
 	},
+	
+	onCacheEntryVisitCompleted: function (){
+		
+		if (CacheDownload.CacheVisitor.mode == CacheDownload.CacheVisitor.MODE_MEMORY) {
+			CacheDownload.CacheVisitor.mode = CacheDownload.CacheVisitor.MODE_DISK;
+			CacheDownload.CacheVisitor.aCallback.beforeVisitEntries();
+			var cacheService = Components.classes["@mozilla.org/netwerk/cache-storage-service;1"].getService(Components.interfaces.nsICacheStorageService);
+			cacheService.memoryCacheStorage(LoadContextInfo.default,false).asyncVisitStorage(CacheDownload.CacheVisitor, true);
+			
+		} else if (CacheDownload.CacheVisitor.mode == CacheDownload.CacheVisitor.MODE_DISK) {
+			CacheDownload.CacheVisitor.mode = CacheDownload.CacheVisitor.MODE_DISPATCH;
+			var cacheService = Components.classes["@mozilla.org/netwerk/cache-storage-service;1"].getService(Components.interfaces.nsICacheStorageService);
+			cacheService.diskCacheStorage(LoadContextInfo.default,false).asyncVisitStorage(CacheDownload.CacheVisitor,true);
+
+		} else if (CacheDownload.CacheVisitor.mode == CacheDownload.CacheVisitor.MODE_DISPATCH) {
+			
+			function timerVisitEntries() {
+			}
+			timerVisitEntries.prototype = {
+				observe: function(aTimer, aTopic, aData) {
+					if (CacheDownload.CacheVisitor.cacheEntries != null && CacheDownload.CacheVisitor.cacheEntries.length>0) {
+						var aEntryInfo2 = CacheDownload.CacheVisitor.cacheEntries.pop();	
+						CacheDownload.CacheVisitor.aCallback.visitEntry(aEntryInfo2);
+						CacheDownload.CacheVisitor.timer.init(this, 0, CacheDownload.CacheVisitor.timer.TYPE_ONE_SHOT);
+					} else {
+						CacheDownload.CacheVisitor.aCallback.afterVisitEntries();
+					}
+				}
+			};
+			
+			CacheDownload.CacheVisitor.timer.init(new timerVisitEntries(), 0, CacheDownload.CacheVisitor.timer.TYPE_ONE_SHOT);
+		}
+		
+	}
+	
 };
 
 CacheDownload.SharedObjects.RulerParser = {
@@ -309,6 +340,13 @@ CacheDownload.SharedObjects.RulerParser = {
 			rule.isEnabled = cells[i].getAttribute("isEnabled") == "true"; 
 			rule.fileNameExpression = this.migrate(cells[i].getAttribute("fileNameExpression"), rule.version); 
 			rule.ruleExpression = cells[i].getAttribute("ruleExpression"); 
+			rule.locationExpression = cells[i].getAttribute("locationExpression"); 
+			
+			//add locationExpression
+			if (rule.locationExpression == null || rule.locationExpression == "null") {
+				rule.locationExpression = "";
+			}
+			
 			callback_p(rule);
 		}
 	},
@@ -330,6 +368,7 @@ CacheDownload.SharedObjects.RulerParser = {
 			ruleXml.setAttribute("isEnabled", rule.isEnabled ? "true" : "false");	
 			ruleXml.setAttribute("fileNameExpression", rule.fileNameExpression);	
 			ruleXml.setAttribute("ruleExpression", rule.ruleExpression);	
+			ruleXml.setAttribute("locationExpression", rule.locationExpression);	
 			rulesXml.appendChild(ruleXml);
 		}
 		
@@ -338,6 +377,8 @@ CacheDownload.SharedObjects.RulerParser = {
 		return xml;
 	}
 };
+
+
 
 CacheDownload.FileUtil={
 	
@@ -465,7 +506,6 @@ CacheDownload.FileUtil={
 		var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
 		
 		
-		
 		//Retrieve current extension from the given expressionValue
 		var aExt = "";
 		var extension = aBaseName.split(".");
@@ -487,7 +527,7 @@ CacheDownload.FileUtil={
     var aDocument = null;
     var aDefaultFileName = "default";
     
-    var aSkipPrompt = true;
+    var aSkipPrompt = true; 		 //skip dialog saveAs
     var aShouldBypassCache = false;  //IMPORTANT
     var aCacheKey = null;
 
@@ -498,17 +538,17 @@ CacheDownload.FileUtil={
     // Find the URI object for aURL and the FileName/Extension to use when saving.
     // FileName/Extension will be ignored if aChosenData supplied.
     
-		//Make uri for source
-		var source_fileInfo = new FileInfo(aDefaultFileName);
-		initFileInfo(source_fileInfo, aURL, null, null, null, null);
-		var sourceURI = source_fileInfo.uri;
+	//Make uri for source
+	var source_fileInfo = new FileInfo(aDefaultFileName);
+	initFileInfo(source_fileInfo, aURL, null, null, null, null);
+	var sourceURI = source_fileInfo.uri;
 		
-		//Make uri and file for target
-		var target_fileInfo = new FileInfo(aDefaultFileName);
-		initFileInfo(target_fileInfo, aURL, null, null, null, null);
-	    target_fileInfo.fileExt = aExt;
-		target_fileInfo.fileBaseName = aBaseName;
-		target_fileInfo.fileName=target_fileInfo.fileBaseName;
+	//Make uri and file for target
+	var target_fileInfo = new FileInfo(aDefaultFileName);
+	initFileInfo(target_fileInfo, aURL, null, null, null, null);
+	target_fileInfo.fileExt = aExt;
+	target_fileInfo.fileBaseName = aBaseName;
+	target_fileInfo.fileName=target_fileInfo.fileBaseName;
 		
 		 
 		var fpParams = {
@@ -524,35 +564,48 @@ CacheDownload.FileUtil={
     var relatedURI = null;
     var aReferrer = null;
     
-    promiseTargetFile(fpParams, aSkipPrompt, relatedURI).then(aDialogAccepted => {
-      if (!aDialogAccepted)
-        return;
+    
+    if (aLocation != null && aLocation.length>0 && aLocation != "null") {
+    	var folder = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsIFile);
+		folder.initWithPath(aLocation);
+		file = folder.clone();
+		file.append(target_fileInfo.fileBaseName+"."+aExt);
+    	continueSave();
+    	
+    } else {
+    	
+      promiseTargetFile(fpParams, aSkipPrompt, relatedURI).then(aDialogAccepted => {
+	      if (!aDialogAccepted)
+	        return;
+	
+	      saveAsType = fpParams.saveAsType;
+	      file = fpParams.file;
+	
+	        // trigger continueSave after a specific delay
+	        var timer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
+	        
+	        function timerDownloadback() {}
+	        timerDownloadback.prototype = {
+	          _finalize: function() {
+	          },
+	          observe: function(aTimer, aTopic, aData) {
+	            continueSave();
+	          }
+	        };
+	        
+	        timer.init(new timerDownloadback(), consecutive, timer.TYPE_ONE_SHOT);
+	        
+	    }).then(null, Components.utils.reportError);
 
-      saveAsType = fpParams.saveAsType;
-      file = fpParams.file;
-
-        // trigger continueSave after a specific delay
-        var timer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
-        
-        function timerDownloadback() {}
-        timerDownloadback.prototype = {
-          _finalize: function() {
-          },
-          observe: function(aTimer, aTopic, aData) {
-            continueSave();
-          }
-        };
-        
-        timer.init(new timerDownloadback(), consecutive, timer.TYPE_ONE_SHOT);
-        
-    }).then(null, Components.utils.reportError);
-  
-
+    }
+    
+    
     function continueSave() {
       // If we're saving a document, and are saving either in complete mode or
       // as converted text, pass the document to the web browser persist component.
       // If we're just saving the HTML (second option in the list), send only the URI.
-      
+
+        
       var persistArgs = {
         sourceURI         : sourceURI,
         sourceReferrer    : aReferrer,
@@ -606,11 +659,9 @@ CacheDownload.ListViewUtils = {
 		};
 		
 		this.clear = function() {
-			alert("soo");
 			while (this.objects.length > 0) {
 			    this.objects.pop();
 			}
-			alert("oo");
 			if (this.fCallback != null) {
 				this.fCallback.updateContents();
 			}
@@ -630,17 +681,10 @@ CacheDownload.ListViewUtils = {
 CacheDownload.CacheManager = {
 
 	onClearCache: function() {
-		var cacheService = Components.classes["@mozilla.org/network/cache-service;1"].getService(Components.interfaces.nsICacheService);
-		try {
-			cacheService.evictEntries(Components.interfaces.nsICache.STORE_ON_DISK);
-        }
-        catch(e) {
-        }
-        try {
-		    cacheService.evictEntries(Components.interfaces.nsICache.STORE_IN_MEMORY);
-        }
-        catch(e) {
-        }
+			try {
+				var cacheService = Components.classes["@mozilla.org/netwerk/cache-storage-service;1"].getService(Components.interfaces.nsICacheStorageService);
+				cacheService.clear();
+			} catch(er) {}
 	}
 };
 
@@ -1180,7 +1224,6 @@ CacheDownload.CacheBrowser={
 		onLoad: function() {
 		},
 		
-		
 		onDialogCancel: function() {
 		}, 
 		
@@ -1210,65 +1253,9 @@ CacheDownload.CacheBrowser={
 		
 		visitEntry: function (aEntryValue) {
 				try {
-			var icon = "unknown";
-			var value = aEntryValue;
-			
-			if (CacheDownload.CacheBrowser.match && CacheDownload.CacheBrowser.match.exec(aEntryValue.key)) {
-
-				//filename from key
-				var ext = value.filename.split("\.")
-				if (ext.length>1) {
-					icon = ext[1];
-				}
-				icon = "moz-icon://."+icon+"?size=16";
-				
-				try {
-					var cacheService = Components.classes["@mozilla.org/network/cache-service;1"].getService(Components.interfaces.nsICacheService);
-					var session = cacheService.createSession(aEntryValue.clientID, Components.interfaces.nsICache.STORE_ANYWHERE, aEntryValue.isStreamBased);
-					session.doomEntriesIfExpired = false;
-					
-					function cacheListener(entryValue_p, icon_p) {
-						this.entryValue = entryValue_p;
-						this.aIcon = icon_p;
-					}
-					cacheListener.prototype = {
-						entryValue : null,
-						aIcon : "",
-						onCacheEntryAvailable : function(descriptor, accessGranted, status) {
-							try {
-								var head = descriptor.getMetaDataElement("response-head");
-								var cType = null;
-								var contentTypeHeader = "Content-Type: ";
-								var a = head.indexOf(contentTypeHeader);
-								if (a > 0) {
-									var b = head.indexOf("\n", a+contentTypeHeader.length);
-									cType = head.substring(a+contentTypeHeader.length, b-1);
-									b = cType.indexOf(";");
-									if (b > 0) {
-										cType = cType.substring(0, b);
-									}
-									this.aIcon = this.aIcon + "&contentType="+cType;
-									this.entryValue.contentType = cType;
-								}
-							} catch(e) {
-							}
-							
-							//Add item
-							this.entryValue.img_filename = this.aIcon;
-							CacheDownload.CacheBrowser.listener.add(this.entryValue);
-						}
-					};
-					
-					var descriptor = session.asyncOpenCacheEntry(aEntryValue.key, Components.interfaces.nsICache.ACCESS_READ, new cacheListener(value, icon));
-					
+					CacheDownload.CacheBrowser.listener.add(aEntryValue);
 				} catch(e) {
 				}
-			
-			}
-			
-			} catch(aae) {
-			}
-				
 		},
 
 		onClearCache: function() {
