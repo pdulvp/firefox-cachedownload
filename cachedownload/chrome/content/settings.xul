@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE window SYSTEM "chrome://cachedownload/locale/locale.dtd">
+<?xml-stylesheet href="chrome://cachedownload/skin/style.css" type="text/css"?>
+
+
+<window
+    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+    width="1"
+    height="1"
+    onload="window.close();">   <!-- Close window if it gets opened directly for some reason -->
+
+    
+    <setting type="control">
+    <button id="adblockplus-filters" label="Edit rules" oncommand="window.openDialog('chrome://cachedownload/content/options.xul', null, 'chrome,titlebar,toolbar,centerscreen,modal');"/>
+  </setting>
+    
+ 	<setting pref="extensions.cachedownload.TIMER_CACHE_CHECK" type="integer"  min="1000" max="1000000"  title="&cachedownload.options.general.timeCheckCache;"/>
+  	<setting pref="extensions.cachedownload.TIMER_DOWNLOAD_CONSECUTIVE" min="500" max="100000" type="integer" title="&cachedownload.options.general.timeConsecutiveDownload;"/>
+  	<setting pref="extensions.cachedownload.MAX_SAME" type="integer" min="3" max="20" title="&cachedownload.options.general.MaxSameSize;"/>
+
+</window>
+
+
+

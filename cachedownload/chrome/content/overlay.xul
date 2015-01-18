@@ -41,8 +41,7 @@
 		</tooltip>
 		
            <menuitem id="cachedownload-activate-ctx-menuitem"
-            label="&cachedownload.activate;"
-        type="checkbox"
+            label="&cachedownload.activate;" type="checkbox"
             oncommand="CacheDownload.switchmode(event);"
             tooltiptext="&cachedownload.activate.tooltip;"
             class="menuitem-iconic cachedownload-options"
@@ -59,17 +58,17 @@
             
             <menuseparator />
       
-            <!--menuitem id="cachedownload-cacheviewer-ctx-menuitem"
-              label="&cachedownload.cacheviewer;"
-              tooltiptext="&cachedownload.cacheviewer.tooltip;"
-              oncommand="CacheDownload.CacheBrowser.onBrowseCache();"
-              class="menuitem-iconic cachedownload-about"
-            /-->
-            
             <menuitem id="cachedownload-cacheviewer-ctx-menuitem"
               label="&cachedownload.clearcache;"
               tooltiptext="&cachedownload.clearcache.tooltip;"
               oncommand="CacheDownload.CacheManager.onClearCache();"
+              class="menuitem-iconic cachedownload-about"
+            />
+            
+            <menuitem id="cachedownload-cacheviewer-ctx-menuitem"
+              label="&cachedownload.options.displayOptions;"
+              tooltiptext="&cachedownload.options.displayOptions;"
+              oncommand="CacheDownload.onDisplayOptions();"
               class="menuitem-iconic cachedownload-about"
             />
             

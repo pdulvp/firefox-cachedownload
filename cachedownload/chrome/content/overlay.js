@@ -15,21 +15,6 @@
 	TIMER_DOWNLOAD_CONSECUTIVE:2000,
 	MAX_SAME:5,
 
-	get _cacheService() {
-		if (!this.__cacheService) {
-			this.__cacheService = Components.classes["@mozilla.org/network/cache-service;1"].getService(Components.interfaces.nsICacheService);
-		}
-		return this.__cacheService;
-	},
-	__cacheService: null,
-	
-	get _dateService() {
-		if (!this.__dateService) {
-			this.__dateService = Components.classes["@mozilla.org/intl/scriptabledateformat;1"].getService(Components.interfaces.nsIScriptableDateFormat);
-		}
-		return this.__dateService;
-	},
-	__dateService: null,
 	
 	onLoad: function() {
 		  //gBrowser.addEventListener("load", this.onNeedChange, false);
@@ -155,6 +140,12 @@
 		openDialog('chrome://cachedownload/content/options.xul', null, 'chrome,titlebar,toolbar,centerscreen,modal');
 		  
 	},
+
+	onDisplayOptions: function(ev) {
+		Components.utils.import('resource://gre/modules/Services.jsm');
+		Services.wm.getMostRecentWindow('navigator:browser').BrowserOpenAddonsMgr('addons://detail/cachedownload@phigDR.projects/preferences');
+	},
+	
 	
 	triggerCheck : function() {
 		var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
@@ -287,7 +278,8 @@
 		//Enhance precondition :)
     	if (this.files[index].size<10) return;
     	
-		var filename = this.files[index].evaluatedFilename();
+		
+    	var filename = this.files[index].evaluatedFilename();
 		this.files[index].evaluatedFilename2 = filename;
 		this.lastDownloadedFile = this.files[index];
 		this.computeInformations(null);
@@ -299,6 +291,7 @@
 		//aConsoleService.logStringMessage("Saved to : "+filename);
 		//internalSave(key, null, null, null, null, false, null, auto, null, true);
 	},
+	
 	
 	linkPreferenceListener: function () {
 		if (this.prefs != null) {

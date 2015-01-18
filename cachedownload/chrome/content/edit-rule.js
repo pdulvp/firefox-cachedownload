@@ -2,7 +2,6 @@
 
 CacheDownload.EditRule={
 	rule : null,
-	result : null,
 	match: null,
 	tbRuleExpression : null,
 	tbFileNameExpression : null,
@@ -11,12 +10,8 @@ CacheDownload.EditRule={
 	
 	listener : null,
 	
-	onLoad: function() {
-		if (window.arguments && window.arguments.length) {
-			newInstall = false;
-			this.rule = window.arguments[0];
-			this.result = window.arguments[1];
-		}
+	onLoad: function(rule_p) {
+		this.rule = rule_p;
 		
 		if (this.rule!=null) {
 			this.tbRuleExpression = document.getElementById("tbRuleExpression");
@@ -42,7 +37,6 @@ CacheDownload.EditRule={
 		this.rule["locationExpression"]=this.tbLocationExpression.value;
 		this.rule["id"]=this.tbId.value;
 		this.rule["description"]=this.tbDescription.value;
-		this.result["status"]=true;
 	},
 	
 	onShowVariables: function() {
@@ -258,7 +252,7 @@ CacheDownload.EditRule={
 		
 		}
 		} catch(aae) {
-			}
-			
+		}
+
 	}
 };

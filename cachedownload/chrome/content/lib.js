@@ -501,7 +501,7 @@ CacheDownload.FileUtil={
 		
 	}, 
 	
-	myInternalSave : function(aURL, aBaseName, aLocation, consecutive)
+	myInternalSave : function(aURL, aBaseName, aLocation, consecutive, aSkipPrompt = true)
 	{
 		var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
 		
@@ -527,7 +527,7 @@ CacheDownload.FileUtil={
     var aDocument = null;
     var aDefaultFileName = "default";
     
-    var aSkipPrompt = true; 		 //skip dialog saveAs
+    //skip dialog saveAs
     var aShouldBypassCache = false;  //IMPORTANT
     var aCacheKey = null;
 
@@ -684,7 +684,18 @@ CacheDownload.CacheManager = {
 			try {
 				var cacheService = Components.classes["@mozilla.org/netwerk/cache-storage-service;1"].getService(Components.interfaces.nsICacheStorageService);
 				cacheService.clear();
-			} catch(er) {}
+					new Notification("Cache Download", {
+		        	  body: 'Cache has been cleared', 
+		        	  icon: "chrome://cachedownload/skin/icon24b.png"
+		          });
+			        
+			} catch(er) {
+				new Notification("Cache Download", {
+		        	  body: 'An error occured while clearing cache', 
+		        	  icon: "chrome://cachedownload/skin/icon24b.png"
+		          });
+				
+			}
 	}
 };
 

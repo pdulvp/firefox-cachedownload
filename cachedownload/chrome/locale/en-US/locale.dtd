@@ -1,12 +1,13 @@
 ﻿<!-- TOOLBAR AND STATUSBAR BUTTONS -->
 <!ENTITY cachedownload.switchmode "CacheDownload">
 <!ENTITY cachedownload.options.title "Options">
+<!ENTITY cachedownload.options.displayOptions "Options...">
 
 <!ENTITY cachedownload.activate "Start CacheDownload">
 <!ENTITY cachedownload.activate.tooltip "Enable CacheDownload">
 
-<!ENTITY cachedownload.configure "Configurer les règles">
-<!ENTITY cachedownload.configure.tooltip "Configurer les règles de téléchargement">
+<!ENTITY cachedownload.configure "Edit rules">
+<!ENTITY cachedownload.configure.tooltip "Edit downloading rules">
 
 <!ENTITY cachedownload.clearcache "Clear cache">
 <!ENTITY cachedownload.clearcache.tooltip "Clear cache">
@@ -24,6 +25,9 @@
 <!ENTITY cachedownload.options.rules.description.label "Description">
 
 <!ENTITY cachedownload.options.rules.new "New">
+<!ENTITY cachedownload.options.rules.newEmptyRule "New rule">
+<!ENTITY cachedownload.options.rules.duplicate "Duplicate">
+
 <!ENTITY cachedownload.options.rules.edit "Edit">
 <!ENTITY cachedownload.options.rules.delete "Delete">
 <!ENTITY cachedownload.options.rules.loadDefaults "Load Default">
@@ -40,11 +44,15 @@
 <!ENTITY cachedownload.options.selectFolder "Select Folder">
 <!ENTITY cachedownload.options.selectFolderExpression "Leave empty to use the default download folder">
 
+<!ENTITY cachedownload.options.cacheitem.open "Open in browser">
+<!ENTITY cachedownload.options.cacheitem.save "Save as...">
 
+<!ENTITY cachedownload.actions.tooltiptext "Actions">
 <!ENTITY cachedownload.options.general.label "Main">
 <!ENTITY cachedownload.options.general.timeCheckCache "Time between two cache checks (ms)">
 <!ENTITY cachedownload.options.general.timeConsecutiveDownload "Time between two consecutive downloads (ms)">
 <!ENTITY cachedownload.options.general.MaxSameSize "A cache item is downloadable if size hasn't changed for (x) times">
+<!ENTITY cachedownload.options.general.editRules "Edit rules">
 
 <!ENTITY cachedownload.options.listview.title "Elements">
 <!ENTITY cachedownload.options.listview.key.label "Key">

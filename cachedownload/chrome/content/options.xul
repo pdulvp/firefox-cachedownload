@@ -4,28 +4,284 @@
 
 <!DOCTYPE dialog SYSTEM "chrome://cachedownload/locale/locale.dtd">
 
-<prefwindow id="cachedownload-window"
+<dialog id="cachedownload-window"
     buttons="accept,cancel"
     title="&cachedownload.options.title;"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
     onload="CacheDownload.Options.onLoad();"
     onunload="CacheDownload.Options.onDialogAccept();"
-	width="600px"
-	height="370px">
+	width="1200px"
+	height="500px">
 
+    <script type="application/javascript;version=1.7" src="chrome://global/content/contentAreaUtils.js"/>
+	<script type="application/javascript;version=1.7" src="chrome://cachedownload/content/edit-rule.js"/>
     <script type="application/javascript;version=1.7" src="chrome://cachedownload/content/options.js"/>
     <script type="application/javascript;version=1.7" src="chrome://cachedownload/content/lib.js"/>
-	
-	<prefpane id="paneGeneral" selected="true" label="&cachedownload.options.pane.general;" src="chrome://cachedownload/content/prefs-general.xul" flex="1"/>
-    <prefpane id="paneRules" label="&cachedownload.options.pane.rules;" src="chrome://cachedownload/content/prefs-rules.xul" flex="1"/>
 	
 	<command id="deleteRule" oncommand="CacheDownload.Options.onDeleteRule();"/>
     <command id="editRule" oncommand="CacheDownload.Options.onEditRule();"/>
     <command id="newRule" oncommand="CacheDownload.Options.onNewRule();"/>
+    <command id="duplicateRule" oncommand="CacheDownload.Options.onDuplicateRule();"/>
     <command id="loadDefaultRules" oncommand="CacheDownload.Options.onLoadDefaultRules();"/>
 	
     <command id="moveUpRule" oncommand="CacheDownload.Options.onMoveUpRule();"/>
     <command id="moveDownRule" oncommand="CacheDownload.Options.onMoveDownRule();"/>
 	
+    
+	<stringbundleset id="cachedownload.options.stringbundleset">
+		<stringbundle id="cachedownload.options.strings" src="chrome://cachedownload/locale/locale.properties"/>
+	</stringbundleset>
+
+<command id="checkRuleExpression" oncommand="CacheDownload.Options.onCheckRuleExpression();"/>
+<command id="selectFolder" oncommand="CacheDownload.Options.onSelectFolder();"/>
+<command id="checkFileNameExpression" oncommand="CacheDownload.Options.onCheckFileNameExpression();"/>
+<command id="showVariables" oncommand="CacheDownload.Options.onShowVariables();"/>
+<command id="showFunctions" oncommand="CacheDownload.Options.onShowFunctions();"/>
+<command id="menuItemPress" oncommand="CacheDownload.Options.onPressMenuItem(event);"/>
+    
 	
-</prefwindow>
+	<popupset>
+		<menupopup id="cacheDownloadPopup">
+			<menuitem label="&cachedownload.options.cacheitem.open;" 
+					  oncommand="CacheDownload.CacheView.openCacheElement();"/>
+			<menuitem label="&cachedownload.options.cacheitem.save;" 
+					  oncommand="CacheDownload.CacheView.saveCacheElement();"/>
+		</menupopup>
+	</popupset>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <vbox flex="1">
+	<hbox flex="1">
+    
+	<vbox width="270px">
+        
+        <richlistitem id="cachedownload-ruleTemplate" class="cachedownload-rule" hidden="true">
+            <vbox flex="1">
+            
+            <hbox align="center" flex="1" >
+              <checkbox label="" class="cachedownload-rule-checkbox" tabindex="-1" oncommand="CacheDownload.Options.onEnableRule();"/>
+                
+              <hbox flex="1" >
+              <vbox>
+                <hbox align="center">
+                   <description class="cachedownload-rule-title" value="" flex="1" crop="end"/>
+                </hbox>
+                <hbox align="center" flex="1" >
+                  <description class="cachedownload-rule-description" value=""/>
+                </hbox>
+              </vbox>
+              </hbox>
+                
+              <button class="btnRuleActions tabable" type="menu" tooltiptext="&cachedownload.actions.tooltiptext;" tabindex="-1">
+                <menupopup class="actionMenu" >
+                        <menuitem id="editButton" label="&cachedownload.options.rules.edit;" command="editRule" default="true"/>
+                    <menuitem id="newButton" label="&cachedownload.options.rules.duplicate;" command="duplicateRule" />
+                    <menuitem id="deleteButton" label="&cachedownload.options.rules.delete;" command="deleteRule" />
+                    <menuseparator/>
+                    <menuitem class="moveUpButton" id="moveUpButton" label="&cachedownload.options.rules.moveUp;" command="moveUpRule" />
+                    <menuitem class="moveDownButton" id="moveDownButton" label="&cachedownload.options.rules.moveDown;" command="moveDownRule" />
+                </menupopup>
+              </button>
+            </hbox>
+
+          </vbox>
+            
+            
+            
+        </richlistitem>
+
+        <deck id="noFiltersDeck" flex="1">
+          <richlistbox id="cachedownload-listRules2" flex="1"
+              ondblclick="CacheDownload.Options.onDblClickRule(this);"
+              onselect="CacheDownload.Options.onSelectRule(this);">
+              
+              
+  <richlistitem id="cachedownload-addNewRule">
+  </richlistitem>
+              
+            </richlistbox>
+        </deck>
+        
+    </vbox>
+	
+        
+        
+  <splitter id="cachedownload-splitter" persist="state" orient="horizontal" collapse="after" state="open" oncommand="">
+  </splitter>
+
+        
+        
+        
+        
+        
+        
+<vbox flex="1" id="cachedownload-rule-properties">
+	<hbox flex="1">
+	<vbox flex="1">
+	
+	<groupbox>
+		<grid flex="1">
+		<columns>
+			<column/>
+			<column flex="1"/>
+		</columns>
+		<rows>
+			<row >
+				<caption label="&cachedownload.options.editrule.identifier.label;"/>
+				<textbox class="editpane-disablable" id="tbId" multiline="false" onchange="CacheDownload.Options.onRuleChange();"/>
+			</row>
+			<row>
+				<caption label="&cachedownload.options.editrule.description.label;"/>
+				<textbox class="editpane-disablable" id="tbDescription" multiline="false" onchange="CacheDownload.Options.onRuleChange();"/>
+			</row>
+            
+            <row>
+				<caption label="&cachedownload.options.editrule.filenameExpression.label;"/>
+                <hbox flex="1">
+                    <textbox class="editpane-disablable" flex="1" id="tbFileNameExpression" multiline="false" tooltiptext="&cachedownload.options.helpFileExpression;" onchange="CacheDownload.Options.onRuleChange();"/>
+
+                    <button class="editpane-disablable" type="menu" id="btnFunctionsVariablesHelp" tooltiptext="&cachedownload.options.functions;">
+                      <menupopup>
+                        <menu label="Functions" class="menu-iconic" id="btnFunctionsHelp" onpopupshowing="CacheDownload.Options.initFunctionsMenu();">
+                            <menupopup>
+                                <menuseparator/>
+                                <menuitem label="Select..." command="showFunctions" class="menuitem-iconic" id="btnFunctionsHelp" />
+                            </menupopup>
+                        </menu>
+                        <menu label="Variables" class="menu-iconic"  id="btnVariablesHelp"  onpopupshowing="CacheDownload.Options.initVariablesMenu();" >
+                            <menupopup>
+                                <menuseparator/>
+                                <menuitem label="Select..." command="showVariables" class="menuitem-iconic" id="btnVariablesHelp"/>
+                            </menupopup>
+                        </menu>
+                        <menuseparator/>
+                        <menuitem label="Inspect..." command="checkFileNameExpression" class="menuitem-iconic" id="btnCheckFileNameExpression" />
+                      </menupopup>
+                    </button>
+
+                </hbox>
+			</row>
+            
+            <row>
+                <caption label="&cachedownload.options.editrule.folderExpression.label;"/>
+                <hbox flex="1">
+                    <textbox class="editpane-disablable" flex="1" id="tbFolderExpression" multiline="false" tooltiptext="&cachedownload.options.selectFolderExpression;" onchange="CacheDownload.Options.onRuleChange();" />
+                    <button class="editpane-disablable" id="btnSelectFolder" command="selectFolder" tooltiptext="&cachedownload.options.selectFolder;"/>
+                </hbox>
+			</row>
+
+		</rows>
+	</grid>
+	
+	</groupbox>
+	
+	
+        
+        
+	<groupbox flex="1">
+		<vbox>
+            <caption label="&cachedownload.options.editrule.ruleExpression.label;"/>
+		<hbox flex="1">
+			<textbox class="editpane-disablable" flex="1" id="tbRuleExpression" multiline="false" tooltiptext="&cachedownload.options.helpRuleExpression;" onchange="CacheDownload.Options.onRuleChange();"/>
+			<button class="editpane-disablable" id="btnCheckExpression" command="checkRuleExpression" tooltiptext="&cachedownload.options.checkCache;"/>
+		</hbox>
+        
+        
+		</vbox>
+    <vbox flex="1">
+	<hbox flex="1">
+    
+    <hbox flex="1">
+        <tree treelines="true" id="cachedownload-listView-tree" seltype="single" flex="1" 
+              context="cacheDownloadPopup"
+              ondblclick="CacheDownload.CacheView.onDoubleClickElement(event);"
+              onclick="CacheDownload.CacheView.onDetectSelectionRule(event);" >
+            <treecols>
+              <treecol id="filename" width="130" label="&cachedownload.options.cacheview.filename.label;"/>
+			  <splitter class="tree-splitter"/> 
+			  <treecol id="contentType" width="100" label="&cachedownload.options.cacheview.contentType.label;"/>
+              <splitter class="tree-splitter"/> 
+              <treecol id="evaluatedFilename" width="200" label="&cachedownload.options.cacheview.evaluatedFilename.label;"/>
+              <splitter class="tree-splitter"/> 
+              <treecol id="value" label="&cachedownload.options.cacheview.url.label;" flex="1"/>
+              <splitter class="tree-splitter"/> 
+            </treecols>
+            <treechildren flex="1" onoverflow="displayScrollbarSpacer(true)" onunderflow="displayScrollbarSpacer(false)"/>
+        </tree>
+        
+        
+    </hbox>
+        
+        
+  <splitter disabled="true" id="cachedownload-splitter-preview" persist="state" orient="horizontal" collapse="after" state="collapsed" oncommand="">
+      <grippy/>
+  </splitter>
+        
+    <hbox id="right-side" width="200" height="160">
+        <vbox>
+            <image id="imgPreview"/>
+        </vbox>
+    </hbox>
+        
+    </hbox>
+	</vbox>
+        
+        
+	</groupbox>
+	
+</vbox>
+        
+</hbox>
+	
+    
+    
+    
+    
+    
+    
+    
+</vbox>
+
+        
+        
+        
+        
+	
+	</hbox>
+        
+        
+        
+        
+        
+        
+        
+    </vbox>
+    
+    
+    
+    
+  <hbox id="buttons">
+  <button id="backupButton" label="&cachedownload.options.rules.new;" type="menu">
+      
+      <menupopup>
+          <menuitem id="newEmptyButton" label="&cachedownload.options.rules.newEmptyRule;" command="newRule" />
+          <menuitem id="defaultButton" label="&cachedownload.options.rules.loadDefaults;" command="loadDefaultRules" />
+      </menupopup>
+      
+  </button>
+
+  <spacer flex="1"/>
+
+  <button id="close" dlgtype="accept" label="OK"/>
+  <button id="cancel" dlgtype="cancel" label="Cancel"/>
+</hbox>
+    
+    
+</dialog>
