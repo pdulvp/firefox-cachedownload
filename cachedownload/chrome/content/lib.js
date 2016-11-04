@@ -107,6 +107,7 @@ CacheDownload.SharedObjects = {
 		
 		this.predefinedVariables = function() {
 			var objects = new Array();
+			objects.push(new CacheDownload.SharedObjects.VariableDefinition("url", CacheDownload.SharedObjects.TYPE_STRING));
 			objects.push(new CacheDownload.SharedObjects.VariableDefinition("filename", CacheDownload.SharedObjects.TYPE_STRING));
 			objects.push(new CacheDownload.SharedObjects.VariableDefinition("ext", CacheDownload.SharedObjects.TYPE_STRING));
 			objects.push(new CacheDownload.SharedObjects.VariableDefinition("baseFilename", CacheDownload.SharedObjects.TYPE_STRING));
@@ -121,10 +122,15 @@ CacheDownload.SharedObjects = {
 			objects.push(new CacheDownload.SharedObjects.FunctionDefinition("now", []));
 			objects.push(new CacheDownload.SharedObjects.FunctionDefinition("add", CacheDownload.SharedObjects.TYPE_INTEGER));
 			objects.push(new CacheDownload.SharedObjects.FunctionDefinition("mult", CacheDownload.SharedObjects.TYPE_INTEGER));
-			//objects.push(new CacheDownload.SharedObjects.FunctionDefinition("getTabByIndex", CacheDownload.SharedObjects.TYPE_XUL_TAB));
-			//objects.push(new CacheDownload.SharedObjects.FunctionDefinition("getFirstItemByClass", CacheDownload.SharedObjects.TYPE_XUL_ELEMENT));
-			//objects.push(new CacheDownload.SharedObjects.FunctionDefinition("getFirstItemById", CacheDownload.SharedObjects.TYPE_XUL_ELEMENT));
-			//objects.push(new CacheDownload.SharedObjects.FunctionDefinition("getText", CacheDownload.SharedObjects.TYPE_STRING));
+			objects.push(new CacheDownload.SharedObjects.FunctionDefinition("substring", [CacheDownload.SharedObjects.TYPE_STRING, CacheDownload.SharedObjects.TYPE_INTEGER, CacheDownload.SharedObjects.TYPE_INTEGER]));
+			objects.push(new CacheDownload.SharedObjects.FunctionDefinition("uppercase", [CacheDownload.SharedObjects.TYPE_STRING]));
+			objects.push(new CacheDownload.SharedObjects.FunctionDefinition("lowercase", [CacheDownload.SharedObjects.TYPE_STRING]));
+			objects.push(new CacheDownload.SharedObjects.FunctionDefinition("trim", [CacheDownload.SharedObjects.TYPE_STRING]));
+			//objects.push(new CacheDownload.SharedObjects.FunctionDefinition("regexp", [CacheDownload.SharedObjects.TYPE_STRING, CacheDownload.SharedObjects.TYPE_STRING, CacheDownload.SharedObjects.TYPE_STRING] ));
+			objects.push(new CacheDownload.SharedObjects.FunctionDefinition("getTabByIndex", [CacheDownload.SharedObjects.TYPE_INTEGER]));
+			objects.push(new CacheDownload.SharedObjects.FunctionDefinition("getItemByClass", [CacheDownload.SharedObjects.TYPE_XUL_ELEMENT, CacheDownload.SharedObjects.TYPE_STRING, CacheDownload.SharedObjects.TYPE_INTEGER]));
+			objects.push(new CacheDownload.SharedObjects.FunctionDefinition("getItemById", [CacheDownload.SharedObjects.TYPE_XUL_ELEMENT, CacheDownload.SharedObjects.TYPE_STRING]));
+			objects.push(new CacheDownload.SharedObjects.FunctionDefinition("textContent", CacheDownload.SharedObjects.TYPE_XUL_ELEMENT));
 			return objects;
 		};
 		
@@ -419,44 +425,35 @@ CacheDownload.FileUtil={
 		}
 
 		
-		//Remove any weird characters
-		expressionValue=expressionValue.replace(/\s/g, " ");
-		expressionValue=expressionValue.replace(/[^\w _0-9:;,\(\)\-'"\.àáâãäåçèéêëìíîïðòóôõöùúûüýÿ]/g, "");
-		
+		//Remove any slashes characters
+		expressionValue=expressionValue.replace(/[\/\\]/g, "-");
 		return expressionValue;
 	},
 	
 	getFileNameFromURL: function(aURL) {
-		var fileNameFromKey = aURL;
+		var filename = aURL;
 		var regSpearator = null;
 		var segments = null;
 		try {
 			//tor cache-key fix
-			regSpearator=new RegExp("uri=", "g");
-			var segments =  fileNameFromKey.split(regSpearator);
+			regSpearator = new RegExp("uri=", "g");
+			var segments =  filename.split(regSpearator);
 			if (segments.length>1) {
-				fileNameFromKey=segments[1];
+				filename=segments[1];
 			}
-		} catch (ee) { }
+		} catch (exc) { }
 		try {
-			regSpearator = /^(\w+:\/)?\/?([^:\/\s]+)((\/[\w\-\.]+)*\/)([\w-\.]+)[^\/\$;:@&#?\s]?(.*)?$/;
-			segments = regSpearator.exec(fileNameFromKey);
+			//retrieve filename from URI. Based on http://stackoverflow.com/questions/4549654/get-filename-from-url-using-regular-expressions-or-javascript
+			regSpearator = /([^:]+:\/\/)?([^\/]+\/)*([^?#]*)/;
+			segments = regSpearator.exec(filename);
 			if (segments.length>3) {
-				fileNameFromKey = RegExp.$5;
+				filename = RegExp.$3;
 			}
-		} catch (ee) { }
-		try {
-			//remove ?=parameters
-			regSpearator = new RegExp("[?]", "g");
-			segments = fileNameFromKey.split(regSpearator);
-			if (segments.length>0) {
-				fileNameFromKey = segments[0];
-			}
-		} catch (ee) { }
-		return fileNameFromKey;
+		} catch (exc) { }
+		return filename;
 	},
 	
-	getTabByIndex: function(index_p) {
+	getTabByIndex: function(index) {
 		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"].getService(Components.interfaces.nsIWindowMediator);
 		var browserEnumerator = wm.getEnumerator("navigator:browser");
 		
@@ -478,7 +475,7 @@ CacheDownload.FileUtil={
 	getFirstTabItemClass: function(className) {
 		var doc = this.getTabByIndex(0);
 		if (doc != null) {
-			var res = this.getFirstItemWithClass(doc, className);
+			var res = this.getItemByClass(doc, className);
 			if (res != null) {
 				return res;
 			}
@@ -486,16 +483,21 @@ CacheDownload.FileUtil={
 		return null;
 	}, 
 
-	getFirstItemWithClass: function(document, className) {
-		var attr = document.evaluate("//*[@class='"+className+"']", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null );
+	getItemByClass: function(document, className, index=0) {
+		var attr = document.evaluate("//*[@class='"+className+"']", document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null );
 		if (attr!=null) {
-			if (attr.singleNodeValue!=null) {
-				attr=attr.singleNodeValue.textContent;
-			}
+			return attr.snapshotItem(index);
+		}
+		return null;
+	},
+	
+	getItemById: function(document, id) {
+		var attr = document.evaluate("//*[@id='"+id+"']", document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null );
+		if (attr!=null) {
+			return attr.snapshotItem(0);
 		}
 		return attr;
 	},
-	
 	
 	callbackSave: function(data) {
 		
@@ -831,6 +833,9 @@ CacheDownload.AnalyseParser = {
 			} else if (this.type == CacheDownload.SharedObjects.TYPE_STRING && lexemeValue.type == CacheDownload.SharedObjects.TYPE_INTEGER) {
 				this.value = this.value + lexemeValue.value * 1;
 				
+			} else if (this.type == CacheDownload.SharedObjects.TYPE_XUL_ELEMENT && lexemeValue.type == CacheDownload.SharedObjects.TYPE_XUL_ELEMENT) {
+				this.value = lexemeValue.value;
+				
 			}
 		};
 	},
@@ -898,7 +903,11 @@ CacheDownload.AnalyseParser = {
 	},
 	
 	getVariableValue: function(variableDefinition_p, type, rule, entryValue) {
-		if ("filename" == variableDefinition_p.key) {
+		if ("url" == variableDefinition_p.key) {
+			var value = (entryValue == null ? variableDefinition_p.key : entryValue.uri.prePath+entryValue.uri.path);
+			return new CacheDownload.AnalyseParser.LexemeValue(variableDefinition_p.type, value);
+			
+		} else if ("filename" == variableDefinition_p.key) {
 			var value = (entryValue == null ? variableDefinition_p.key : entryValue.filename);
 			return new CacheDownload.AnalyseParser.LexemeValue(variableDefinition_p.type, value);
 			
@@ -943,10 +952,10 @@ CacheDownload.AnalyseParser = {
 		} else if ("date" == functionDefinition_p.key) {
 			var format = "YYYYmmddhhMMss";
 			var date = new Date();
-			if (childs.length>=2){
+			if (childs.length>1){
 				format = childs[1].value;
 			}
-			if (childs.length>=1 && !isNaN(childs[0].value)){
+			if (childs.length>0 && !isNaN(childs[0].value)){
 				date.setTime(childs[0].value);
 			}
 			
@@ -963,6 +972,113 @@ CacheDownload.AnalyseParser = {
 			result=result.replace(/[mdhMsw]/g, '0');
 			
 			result = result.substr(0, result.length-1);
+			return new CacheDownload.AnalyseParser.LexemeValue(CacheDownload.SharedObjects.TYPE_STRING, result);
+			
+		} else if ("substring" == functionDefinition_p.key) {
+			var result = "";
+			var start = 0;
+			if (childs.length>0){
+				result = childs[0].value;
+			}
+			if (childs.length>2){
+				start = childs[1].value;
+				end = childs[2].value;
+				result = result.substring(start, end);
+				
+			} else if (childs.length>1){
+				start = childs[1].value;	
+				result = result.substring(start);
+			}
+			
+			return new CacheDownload.AnalyseParser.LexemeValue(CacheDownload.SharedObjects.TYPE_STRING, result);
+			
+		} else if ("uppercase" == functionDefinition_p.key) {
+			var result = "";
+			if (childs.length>0){
+				result = childs[0].value;
+			}
+			result = result.toUpperCase();
+			return new CacheDownload.AnalyseParser.LexemeValue(CacheDownload.SharedObjects.TYPE_STRING, result);
+			
+		} else if ("lowercase" == functionDefinition_p.key) {
+			var result = "";
+			if (childs.length>0){
+				result = childs[0].value;
+			}
+			result = result.toLowerCase();
+			return new CacheDownload.AnalyseParser.LexemeValue(CacheDownload.SharedObjects.TYPE_STRING, result);
+			
+		} else if ("trim" == functionDefinition_p.key) {
+			var result = "";
+			if (childs.length>0){
+				result = childs[0].value;
+			}
+			result = result.trim();
+			return new CacheDownload.AnalyseParser.LexemeValue(CacheDownload.SharedObjects.TYPE_STRING, result);
+			
+		} else if ("getTabByIndex" == functionDefinition_p.key) {
+			var index = 0;
+			if (childs.length>0){
+				index = childs[0].value;
+			}
+			var result = CacheDownload.FileUtil.getTabByIndex(index);
+			return new CacheDownload.AnalyseParser.LexemeValue(CacheDownload.SharedObjects.TYPE_XUL_ELEMENT, result);
+			
+		} else if ("getItemByClass" == functionDefinition_p.key) {
+			var className = "";
+			var tabDocument = "";
+			var index = 0;
+			if (childs.length>0){
+				tabDocument = childs[0].value;
+			}
+			if (childs.length>1){
+				className = childs[1].value;
+			}
+			if (childs.length>2){
+				index = childs[2].value;
+			}
+			var result = CacheDownload.FileUtil.getItemByClass(tabDocument, className, index);
+			return new CacheDownload.AnalyseParser.LexemeValue(CacheDownload.SharedObjects.TYPE_XUL_ELEMENT, result);
+			
+		} else if ("getItemById" == functionDefinition_p.key) {
+			var id = "";
+			var tabDocument = "";
+			if (childs.length>0){
+				tabDocument = childs[0].value;
+			}
+			if (childs.length>1){
+				id = childs[1].value;
+			}
+			var result = CacheDownload.FileUtil.getItemById(tabDocument, id);
+			return new CacheDownload.AnalyseParser.LexemeValue(CacheDownload.SharedObjects.TYPE_XUL_ELEMENT, result);
+			
+		} else if ("textContent" == functionDefinition_p.key) {
+			var element = "";
+			if (childs.length>0){
+				element = childs[0].value;
+			}
+			var result = element.textContent;
+			return new CacheDownload.AnalyseParser.LexemeValue(CacheDownload.SharedObjects.TYPE_STRING, result);
+			
+		} else if ("regexp" == functionDefinition_p.key) {
+			var result = "";
+			var motif = ".*";
+			var flags = "";
+			var index = 0;
+			if (childs.length>0){
+				result = childs[0].value;
+			}
+			if (childs.length>1){
+				motif = childs[1].value;
+			}
+			if (childs.length>2){
+				flags = childs[2].value;
+			}
+			if (childs.length>3 && !isNaN(childs[3].value)){
+				index = childs[3].value;
+			}
+			var match = new RegExp(motif, flags);
+			result = match.exec(result)[index];
 			return new CacheDownload.AnalyseParser.LexemeValue(CacheDownload.SharedObjects.TYPE_STRING, result);
 		}
 		
