@@ -11,7 +11,7 @@ Same for all those images of funny cats that your familly sent you from whatever
 As a cache manipulation tool, it also allow to view the cache and clear the cache too.
 
 
-**Geek enhanced description:**
+## Geek enhanced description: ##
 With this addon, each time an element is stored in the Firefox cache, you can download it following rules based on their URL.
 
 Rules are **Regular Expressions** which offer enough customization to focus on which elements need to be backup and where.
@@ -24,14 +24,14 @@ To improve privacy, addon don't trigger another connection to source server of e
 
 The filename of the saved file can be computed with several variables and functions;
 
-**Based on the cache element:**
+### Based on the cache element: ###
 * %filename%: Filename of current file (with extension)
 * %ext%: Extension of current file
 * %baseFilename%: Filename of current file (without extension)
 * %lastModifiedDate%: Last modified date of current file
 * %size%: Size of current file
 
-**String and Date Functions:**
+### String and Date Functions: ### 
 * $date(date,format): Returns the current date when saving a file, with a format tat you can choose
 * $substring(start,end): Retrieve the substring of the value
 * $uppercase: Converts a string to uppercase letters
@@ -39,7 +39,7 @@ The filename of the saved file can be computed with several variables and functi
 * $trim: Removes whitespace from both ends of a string
 * $add, $mult : Basic number functions
 
-**DOM Based Functions**
+### DOM Based Functions ### 
 * $getTabByIndex(index): Returns the given Firefox Tab as a DOM document
 * $getItemByClass(dom, className, index): Returns the index item from a tab with the given class
 * $getItemById(dom, id): Returns the item from a tab with the given id
