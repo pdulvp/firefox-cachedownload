@@ -11,7 +11,7 @@ Same for all those images of funny cats that your familly sent you from whatever
 As a cache manipulation tool, it also allow to view the cache and clear the cache too.
 
 
-Geek enhanced description:**
+**Geek enhanced description:**
 With this addon, each time an element is stored in the Firefox cache, you can download it following rules based on their URL.
 
 Rules are **Regular Expressions** which offer enough customization to focus on which elements need to be backup and where.
