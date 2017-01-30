@@ -963,7 +963,7 @@ CacheDownload.AnalyseParser = {
 			//where is the preg_remplace(patterns, replacements, string) ?
 			result=result.replace(/YYYY/g, date.getFullYear());
 			result=result.replace(/YY/g, ((date.getFullYear() % 100)<10?"0":"") +(date.getFullYear() % 100));
-			result=result.replace(/m?m([^m])/g,  (date.getMonth()<10?"0":"") +date.getMonth() + "$1");
+			result=result.replace(/m?m([^m])/g,  ((date.getMonth()+1)<10?"0":"") +(date.getMonth()+1) + "$1");
 			result=result.replace(/d?d([^d])/g,  (date.getDate()<10?"0":"")+ date.getDate() + "$1");
 			result=result.replace(/h?h([^h])/g,  (date.getHours()<10?"0":"") +date.getHours() + "$1");
 			result=result.replace(/M?M([^M])/g,  (date.getMinutes()<10?"0":"")+ date.getMinutes() + "$1");
