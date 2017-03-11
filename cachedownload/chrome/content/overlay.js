@@ -1,6 +1,7 @@
 ﻿var CacheDownload={
 	
 	enabled:false,
+	firstLoad:true,
 	
 	timer:null,
 	rules:null,
@@ -11,6 +12,7 @@
 	previouslyMatchedItemsCount:null,
 	lastDownloadedFile:null,
 	
+	AUTO_START:false,
 	TIMER_CACHE_CHECK:10000,
 	TIMER_DOWNLOAD_CONSECUTIVE:2000,
 	MAX_SAME:5,
@@ -95,30 +97,34 @@
 	},
 	
 	switchmode: function(event) {  
-
-	//	var 
-		//if (object!=null) {
-	//		CacheDownload.enabled=object.hasAttribute("checked");
-	//	}
-		
-		//var 
+		CacheDownload.enable(!CacheDownload.enabled);
+		event.stopPropagation();
+	},
+	
+	updateUI: function(event) {  
 		var object = document.getElementById("cachedownload-activate-ctx-menuitem");
 		if (object != null) {
-			CacheDownload.enabled=object.hasAttribute("checked");
-			var objectTb = document.getElementById("cachedownload-button-switchmode");
-			if (objectTb != null) {
-				if (CacheDownload.enabled) {
-					objectTb.removeAttribute("disabled");
-					
-				} else {
-					objectTb.setAttribute("disabled", "yes");
-				}
+			if (CacheDownload.enabled) {
+				object.setAttribute("checked", "true");
+			} else {
+				object.setAttribute("checked", "false");
 			}
 		}
-		//
+		var objectTb = document.getElementById("cachedownload-button-switchmode");
+		if (objectTb != null) {
+			if (CacheDownload.enabled) {
+				objectTb.removeAttribute("disabled");
+			} else {
+				objectTb.setAttribute("disabled", "yes");
+			}
+		}
+	},
+	
+	enable: function(bool) {  
+		CacheDownload.enabled = bool;
+		CacheDownload.updateUI();
 		
 		var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
-		
 		if (CacheDownload.enabled) {
 			aConsoleService.logStringMessage("[cachedownload] enabled");
 			this.loadPreferences();
@@ -131,19 +137,20 @@
 				CacheDownload.CacheVisitor.cancel();
 			}
 		}
-		
 	},
 	
 	
-	onConfigure: function(ev) {
-
+	onConfigure: function(event) {
 		openDialog('chrome://cachedownload/content/options.xul', null, 'chrome,titlebar,toolbar,centerscreen,modal');
-		  
+		event.stopPropagation();
 	},
 
-	onDisplayOptions: function(ev) {
+	onDisplayOptions: function(event) {
+		var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
+		aConsoleService.logStringMessage("[cachedownload] options");
 		Components.utils.import('resource://gre/modules/Services.jsm');
 		Services.wm.getMostRecentWindow('navigator:browser').BrowserOpenAddonsMgr('addons://detail/cachedownload@phigDR.projects/preferences');
+		event.stopPropagation(); 
 	},
 	
 	
@@ -333,6 +340,18 @@
 		var prefMAX_SAME  = CacheDownload.prefs.service.getIntPref('MAX_SAME');
 		if (prefMAX_SAME!=null && prefMAX_SAME!=undefined && prefMAX_SAME>0) {
 			CacheDownload.MAX_SAME = prefMAX_SAME;
+		}
+		
+		var prefAUTO_START  = CacheDownload.prefs.service.getBoolPref('AUTO_START');
+		if (prefAUTO_START!=null && prefAUTO_START!=undefined) {
+			CacheDownload.AUTO_START = prefAUTO_START;
+		}
+		
+		if (CacheDownload.firstLoad) {
+			CacheDownload.firstLoad = false;
+			if (CacheDownload.AUTO_START) {
+				CacheDownload.enable(true);
+			}
 		}
 	},
 	

@@ -682,7 +682,7 @@ CacheDownload.ListViewUtils = {
 
 CacheDownload.CacheManager = {
 
-	onClearCache: function() {
+	onClearCache: function(event) {
 			try {
 				var cacheService = Components.classes["@mozilla.org/netwerk/cache-storage-service;1"].getService(Components.interfaces.nsICacheStorageService);
 				cacheService.clear();
@@ -698,6 +698,7 @@ CacheDownload.CacheManager = {
 		          });
 				
 			}
+			event.stopPropagation(); 
 	}
 };
 

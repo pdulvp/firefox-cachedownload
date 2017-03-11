@@ -18,7 +18,6 @@
   
 	<toolbarpalette id="BrowserToolbarPalette">
 	
-	
 		
 	   <toolbarbutton id="cachedownload-button-switchmode" 
 	      class="toolbarbutton-1"
@@ -28,7 +27,7 @@
           oncommand="CacheDownload.switchmode(event);"
 	      tooltip="cachedownload-tooltip">
 		  
-		  <menupopup id="cachedownload-context-popup" >
+		  <menupopup id="cachedownload-context-popup" onpopupshowing="CacheDownload.updateUI(event);">
            
     
 		<tooltip id="cachedownload-tooltip" onpopupshowing="CacheDownload.computeInformations(event);">
@@ -41,7 +40,7 @@
 		</tooltip>
 		
            <menuitem id="cachedownload-activate-ctx-menuitem"
-            label="&cachedownload.activate;" type="checkbox"
+            label="&cachedownload.activate;" type="checkbox" autocheck="false"
             oncommand="CacheDownload.switchmode(event);"
             tooltiptext="&cachedownload.activate.tooltip;"
             class="menuitem-iconic cachedownload-options"
@@ -61,14 +60,14 @@
             <menuitem id="cachedownload-cacheviewer-ctx-menuitem"
               label="&cachedownload.clearcache;"
               tooltiptext="&cachedownload.clearcache.tooltip;"
-              oncommand="CacheDownload.CacheManager.onClearCache();"
+              oncommand="CacheDownload.CacheManager.onClearCache(event);"
               class="menuitem-iconic cachedownload-about"
             />
             
             <menuitem id="cachedownload-cacheviewer-ctx-menuitem"
               label="&cachedownload.options.displayOptions;"
               tooltiptext="&cachedownload.options.displayOptions;"
-              oncommand="CacheDownload.onDisplayOptions();"
+              oncommand="CacheDownload.onDisplayOptions(event);"
               class="menuitem-iconic cachedownload-about"
             />
             

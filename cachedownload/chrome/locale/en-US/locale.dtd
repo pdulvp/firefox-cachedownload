@@ -53,6 +53,7 @@
 <!ENTITY cachedownload.options.general.timeConsecutiveDownload "Time between two consecutive downloads (ms)">
 <!ENTITY cachedownload.options.general.MaxSameSize "A cache item is downloadable if size hasn't changed for (x) times">
 <!ENTITY cachedownload.options.general.editRules "Edit rules">
+<!ENTITY cachedownload.options.general.autoStart "Auto Start">
 
 <!ENTITY cachedownload.options.listview.title "Elements">
 <!ENTITY cachedownload.options.listview.key.label "Key">
