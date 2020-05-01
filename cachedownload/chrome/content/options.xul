@@ -14,11 +14,11 @@
 	height="500px">
 
     <script type="application/javascript;version=1.7" src="chrome://global/content/contentAreaUtils.js"/>
-	<script type="application/javascript;version=1.7" src="chrome://cachedownload/content/edit-rule.js"/>
+	  <script type="application/javascript;version=1.7" src="chrome://cachedownload/content/edit-rule.js"/>
     <script type="application/javascript;version=1.7" src="chrome://cachedownload/content/options.js"/>
     <script type="application/javascript;version=1.7" src="chrome://cachedownload/content/lib.js"/>
 	
-	<command id="deleteRule" oncommand="CacheDownload.Options.onDeleteRule();"/>
+	  <command id="deleteRule" oncommand="CacheDownload.Options.onDeleteRule();"/>
     <command id="editRule" oncommand="CacheDownload.Options.onEditRule();"/>
     <command id="newRule" oncommand="CacheDownload.Options.onNewRule();"/>
     <command id="duplicateRule" oncommand="CacheDownload.Options.onDuplicateRule();"/>
@@ -27,7 +27,6 @@
     <command id="moveUpRule" oncommand="CacheDownload.Options.onMoveUpRule();"/>
     <command id="moveDownRule" oncommand="CacheDownload.Options.onMoveDownRule();"/>
 	
-    
 	<stringbundleset id="cachedownload.options.stringbundleset">
 		<stringbundle id="cachedownload.options.strings" src="chrome://cachedownload/locale/locale.properties"/>
 	</stringbundleset>
@@ -49,15 +48,8 @@
 		</menupopup>
 	</popupset>
     
-    
-    
-    
-    
-    
-    
-    
-    
-    <vbox flex="1">
+  
+  <vbox flex="1">
 	<hbox flex="1">
     
 	<vbox width="270px">
@@ -81,7 +73,7 @@
                 
               <button class="btnRuleActions tabable" type="menu" tooltiptext="&cachedownload.actions.tooltiptext;" tabindex="-1">
                 <menupopup class="actionMenu" >
-                        <menuitem id="editButton" label="&cachedownload.options.rules.edit;" command="editRule" default="true"/>
+                    <menuitem id="editButton" label="&cachedownload.options.rules.edit;" command="editRule" default="true"/>
                     <menuitem id="newButton" label="&cachedownload.options.rules.duplicate;" command="duplicateRule" />
                     <menuitem id="deleteButton" label="&cachedownload.options.rules.delete;" command="deleteRule" />
                     <menuseparator/>
@@ -102,9 +94,8 @@
               ondblclick="CacheDownload.Options.onDblClickRule(this);"
               onselect="CacheDownload.Options.onSelectRule(this);">
               
-              
-  <richlistitem id="cachedownload-addNewRule">
-  </richlistitem>
+              <richlistitem id="cachedownload-addNewRule">
+              </richlistitem>
               
             </richlistbox>
         </deck>

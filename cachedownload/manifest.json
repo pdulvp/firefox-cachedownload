@@ -1,0 +1,46 @@
+{
+  "manifest_version": 2,
+  "name": "Cache Download",
+  "author": "pdulvp@laposte.net",
+  "version": "2.0",
+  "homepage_url": "https://github.com/pdulvp/firefox-cachedownload",
+  "description": "Download some elements of cache automatically",
+
+  "applications": {
+	  "gecko": {
+		"id": "cachedownload@pdulvp",
+		"strict_min_version": "60.0"
+	  }
+	},
+
+  "icons": {
+    "32": "chrome/skin/classic/icon32.png",
+    "16": "chrome/skin/classic/icon16.png"
+  },
+
+  "browser_action": {
+    "browser_style": true,
+    "default_icon": "chrome/skin/classic/icon32b.png",
+    "default_title": "Cache Download",
+    "default_popup": "ui/popup.html", 
+    
+    "theme_icons": [{ 
+        "light": "chrome/skin/classic/icon32b.png",
+        "dark": "chrome/skin/classic/icon32b.png",
+        "size": 32
+      }, {
+        "light": "chrome/skin/classic/icon16b.png",
+        "dark": "chrome/skin/classic/icon16b.png",
+        "size": 16
+      }]
+  },
+  
+  "background": {
+    "scripts": ["components/background.js"]
+  }, 
+
+  "content_scripts": [
+    
+  ]
+
+}
