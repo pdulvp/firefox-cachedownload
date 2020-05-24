@@ -1,8 +1,16 @@
 # Cache Download - Mozilla Firefox Addon
 
+This addon downloads automatically elements that you encounter in your daily-use of Firefox
+
+:dizzy_face: **This addon doesn't work with Firefox >58**
+
 (https://addons.mozilla.org/en-US/firefox/addon/cachedownload/)
 
-**This addon downloads automatically elements that you encounter in your daily-use of Firefox**
+![](images/overlay.png)
+
+![](images/edit-rules.png)
+
+
 
 For instance, with a rule matching **PDF bills** that your bank or phone company gives you each month, you will be able to save them automatically when you have opened the bill in Firefox, You don't have to bother you to save them manually in a specific folder for backup, this addon does it for you.
 
@@ -23,6 +31,8 @@ Since an element located in Firefox cache doesn't always means that a complete f
 To improve privacy, addon don't trigger another connection to source server of element, element is already stored in cache so we save cached element !
 
 The filename of the saved file can be computed with several variables and functions;
+
+![](images/functions.png)
 
 ### Based on the cache element: ###
 * %filename%: Filename of current file (with extension)
